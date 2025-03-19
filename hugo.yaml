@@ -2,3 +2,6 @@ baseURL: "https://yusukeshimizu.github.io/blog/"
 title: "blog"
 pagination.pagerSize: 5
 theme: PaperMod
+params:
+  homeInfoParams:
+    Content: note：llmにより多くの部分を生成
