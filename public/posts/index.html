@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><script src="/blog/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=blog/livereload" data-no-instant defer></script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex, nofollow">
@@ -9,17 +9,17 @@
 <meta name="keywords" content="">
 <meta name="description" content="Posts - blog">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:1313/posts/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<link rel="canonical" href="http://localhost:1313/blog/posts/">
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/blog/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/blog/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/posts/index.xml">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/blog/posts/index.xml">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/blog/posts/">
 <noscript>
     <style>
         #theme-toggle,
@@ -74,7 +74,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="blog (Alt + H)">blog</a>
+            <a href="http://localhost:1313/blog/" accesskey="h" title="blog (Alt + H)">blog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -111,7 +111,7 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Greenlight Scheduler と Signer フロー設計ドキュメント
+    <h2 class="entry-hint-parent">Greenlight SchedulerとSignerの関係性
       <span class="entry-hint" title="Draft">
         <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
           <path
@@ -121,21 +121,22 @@
     </h2>
   </header>
   <div class="entry-content">
-    <p>Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。
+    <p>greenlight proto をベースに、gpt o1に解説させたものに修正を加えています。
+1. 概要 Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。
 本稿末尾に Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えて解説します。
-目次 概要 ノード登録とスケジューリングフロー Signer フロー (HSMRequest / HsmService) CLN との連携 シーケンス図 (Mermaid) まとめ mTLS と HSM の詳細 Pairing の詳細 1. 概要 Scheduler は、Greenlight 上でノードをホストし管理するためのエンドポイントを提供するサービスです。
+Scheduler は、Greenlight 上でノードをホストし管理するためのエンドポイントを提供するサービスです。
 一方、Node (greenlight.proto) はノードへのインタラクション (ログ取得・支払い・HSM リクエスト等) を定義し、Signer 連携 (HsmRequest / RespondHsmRequest) を介して秘密鍵操作や承認を行います。
 ノードは基本的に c-lightning (CLN) インスタンスで構成され、Scheduler と Signer の組み合わせで外部アクセス(API)をコントロールします。
 2. ノード登録とスケジューリングフロー 2-1. チャレンジ発行 (GetChallenge) scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成 ChallengeResponse には一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる 2-2. Register / Recover クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信 サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行 Register 時は初回発行、Recover 時は既存ノードの証明書再発行 この証明書と秘密鍵で以降の操作を認証 (node_id ごとに厳密にアクセスを制限) 2-3. Schedule / GetNodeInfo Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る 既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオも) 2-4. 接続・操作 mTLS 認証情報 (device_cert, device_key) により、node.proto や greenlight.proto 内の RPC (支払い・チャンネル操作等) にアクセスできる 署名が必要な操作 (例: チャネルオープン時のトランザクション署名など) は SignerEngine (HSMRequest) を通じて行われる 3. Signer フロー (HSMRequest / HsmService) greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれています。これにより以下のようなシナリオで署名リクエストがやり取りされます。
 ...</p>
   </div>
   <footer class="entry-footer"><span title='2025-03-19 11:07:52 +0900 JST'>March 19, 2025</span></footer>
-  <a class="entry-link" aria-label="post link to Greenlight Scheduler と Signer フロー設計ドキュメント" href="http://localhost:1313/posts/greenlight/"></a>
+  <a class="entry-link" aria-label="post link to Greenlight SchedulerとSignerの関係性" href="http://localhost:1313/blog/posts/2025-03-19/"></a>
 </article>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/">blog</a></span> · 
+        <span>&copy; 2025 <a href="http://localhost:1313/blog/">blog</a></span> · 
 
     <span>
         Powered by

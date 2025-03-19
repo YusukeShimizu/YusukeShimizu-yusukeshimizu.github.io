@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>blog</title>
-    <link>http://localhost:1313/</link>
+    <link>http://localhost:1313/blog/</link>
     <description>Recent content on blog</description>
     <generator>Hugo -- 0.145.0</generator>
     <language>en</language>
     <lastBuildDate>Wed, 19 Mar 2025 11:07:52 +0900</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Greenlight SchedulerとSignerの関係性</title>
-      <link>http://localhost:1313/posts/2025-03-19/</link>
+      <link>http://localhost:1313/blog/posts/2025-03-19/</link>
       <pubDate>Wed, 19 Mar 2025 11:07:52 +0900</pubDate>
-      <guid>http://localhost:1313/posts/2025-03-19/</guid>
+      <guid>http://localhost:1313/blog/posts/2025-03-19/</guid>
       <description>&lt;p&gt;&lt;a href=&#34;https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient&#34;&gt;greenlight proto&lt;/a&gt; をベースに、gpt o1に解説させたものに修正を加えています。&lt;/p&gt;
 &lt;h2 id=&#34;1-概要&#34;&gt;1. 概要&lt;/h2&gt;
 &lt;p&gt;Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。&lt;br&gt;

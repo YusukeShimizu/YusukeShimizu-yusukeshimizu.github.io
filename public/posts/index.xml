@@ -2,33 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Posts on blog</title>
-    <link>http://localhost:1313/posts/</link>
+    <link>http://localhost:1313/blog/posts/</link>
     <description>Recent content in Posts on blog</description>
     <generator>Hugo -- 0.145.0</generator>
     <language>en</language>
     <lastBuildDate>Wed, 19 Mar 2025 11:07:52 +0900</lastBuildDate>
-    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/blog/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Greenlight Scheduler と Signer フロー設計ドキュメント</title>
-      <link>http://localhost:1313/posts/greenlight/</link>
+      <title>Greenlight SchedulerとSignerの関係性</title>
+      <link>http://localhost:1313/blog/posts/2025-03-19/</link>
       <pubDate>Wed, 19 Mar 2025 11:07:52 +0900</pubDate>
-      <guid>http://localhost:1313/posts/greenlight/</guid>
-      <description>&lt;p&gt;Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。&lt;br&gt;
-本稿末尾に Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えて解説します。&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;目次&#34;&gt;目次&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;概要&lt;/li&gt;
-&lt;li&gt;ノード登録とスケジューリングフロー&lt;/li&gt;
-&lt;li&gt;Signer フロー (HSMRequest / HsmService)&lt;/li&gt;
-&lt;li&gt;CLN との連携&lt;/li&gt;
-&lt;li&gt;シーケンス図 (Mermaid)&lt;/li&gt;
-&lt;li&gt;まとめ&lt;/li&gt;
-&lt;li&gt;mTLS と HSM の詳細&lt;/li&gt;
-&lt;li&gt;Pairing の詳細&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
+      <guid>http://localhost:1313/blog/posts/2025-03-19/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient&#34;&gt;greenlight proto&lt;/a&gt; をベースに、gpt o1に解説させたものに修正を加えています。&lt;/p&gt;
 &lt;h2 id=&#34;1-概要&#34;&gt;1. 概要&lt;/h2&gt;
+&lt;p&gt;Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。&lt;br&gt;
+本稿末尾に Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えて解説します。&lt;/p&gt;
 &lt;p&gt;Scheduler は、Greenlight 上でノードをホストし管理するためのエンドポイントを提供するサービスです。&lt;br&gt;
 一方、Node (greenlight.proto) はノードへのインタラクション (ログ取得・支払い・HSM リクエスト等) を定義し、Signer 連携 (HsmRequest / RespondHsmRequest) を介して秘密鍵操作や承認を行います。&lt;/p&gt;
 &lt;p&gt;ノードは基本的に c-lightning (CLN) インスタンスで構成され、Scheduler と Signer の組み合わせで外部アクセス(API)をコントロールします。&lt;/p&gt;
