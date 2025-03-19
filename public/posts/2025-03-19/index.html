@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Greenlight SchedulerとSignerの関係性 | blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="greenlight proto をベースに、gpt o1に解説させたものに修正を加えています。
+1. 概要
+Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。
+本稿末尾に Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えて解説します。
+Scheduler は、Greenlight 上でノードをホストし管理するためのエンドポイントを提供するサービスです。
+一方、Node (greenlight.proto) はノードへのインタラクション (ログ取得・支払い・HSM リクエスト等) を定義し、Signer 連携 (HsmRequest / RespondHsmRequest) を介して秘密鍵操作や承認を行います。
+ノードは基本的に c-lightning (CLN) インスタンスで構成され、Scheduler と Signer の組み合わせで外部アクセス(API)をコントロールします。
+
+2. ノード登録とスケジューリングフロー
+2-1. チャレンジ発行 (GetChallenge)
+
+scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成
+ChallengeResponse には一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる
+
+2-2. Register / Recover
+
+クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信
+サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行
+Register 時は初回発行、Recover 時は既存ノードの証明書再発行
+この証明書と秘密鍵で以降の操作を認証 (node_id ごとに厳密にアクセスを制限)
+
+2-3. Schedule / GetNodeInfo
+
+Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る
+既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオも)
+
+2-4. 接続・操作
+
+mTLS 認証情報 (device_cert, device_key) により、node.proto や greenlight.proto 内の RPC (支払い・チャンネル操作等) にアクセスできる
+署名が必要な操作 (例: チャネルオープン時のトランザクション署名など) は SignerEngine (HSMRequest) を通じて行われる
+
+
+3. Signer フロー (HSMRequest / HsmService)
+greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれています。これにより以下のようなシナリオで署名リクエストがやり取りされます。">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/2025-03-19/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2025-03-19/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+    const elementCode = '.mermaid'
+    const loadMermaid = function (theme) {
+
+        mermaid.initialize({ theme })
+        mermaid.init({ theme }, document.querySelectorAll(elementCode))
+    }
+    const saveOriginalData = function () {
+        return new Promise((resolve, reject) => {
+            try {
+                var els = document.querySelectorAll(elementCode),
+                    count = els.length;
+                els.forEach(element => {
+                    element.setAttribute('data-original-code', element.innerHTML)
+                    count--
+                    if (count == 0) {
+                        resolve()
+                    }
+                });
+            } catch (error) {
+                reject(error)
+            }
+        })
+    }
+    const resetProcessed = function () {
+        return new Promise((resolve, reject) => {
+            try {
+                var els = document.querySelectorAll(elementCode),
+                    count = els.length;
+                els.forEach(element => {
+                    if (element.getAttribute('data-original-code') != null) {
+                        element.removeAttribute('data-processed')
+                        element.innerHTML = element.getAttribute('data-original-code')
+                    }
+                    count--
+                    if (count == 0) {
+                        resolve()
+                    }
+                });
+            } catch (error) {
+                reject(error)
+            }
+        })
+    }
+
+    saveOriginalData()
+        .catch(console.error)
+
+    let statusTheme = localStorage.getItem("pref-theme")
+    if (statusTheme == 'dark') {
+        resetProcessed()
+            .then(loadMermaid('dark'))
+            .catch(console.error)
+    }
+    if (statusTheme == 'light') {
+        resetProcessed()
+            .then(loadMermaid('neutral'))
+            .catch(console.error)
+    }
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        resetProcessed()
+            .then(loadMermaid(mermaid.mermaidAPI.getConfig().theme == 'neutral' ? 'dark' : 'neutral'))
+            .catch(console.error)
+
+    })
+</script>
+
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="blog (Alt + H)">blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Greenlight SchedulerとSignerの関係性
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+    </h1>
+    <div class="post-meta"><span title='2025-03-19 11:07:52 +0900 JST'>March 19, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p><a href="https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient">greenlight proto</a> をベースに、gpt o1に解説させたものに修正を加えています。</p>
+<h2 id="1-概要">1. 概要<a hidden class="anchor" aria-hidden="true" href="#1-概要">#</a></h2>
+<p>Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。<br>
+本稿末尾に Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えて解説します。</p>
+<p>Scheduler は、Greenlight 上でノードをホストし管理するためのエンドポイントを提供するサービスです。<br>
+一方、Node (greenlight.proto) はノードへのインタラクション (ログ取得・支払い・HSM リクエスト等) を定義し、Signer 連携 (HsmRequest / RespondHsmRequest) を介して秘密鍵操作や承認を行います。</p>
+<p>ノードは基本的に c-lightning (CLN) インスタンスで構成され、Scheduler と Signer の組み合わせで外部アクセス(API)をコントロールします。</p>
+<hr>
+<h2 id="2-ノード登録とスケジューリングフロー">2. ノード登録とスケジューリングフロー<a hidden class="anchor" aria-hidden="true" href="#2-ノード登録とスケジューリングフロー">#</a></h2>
+<h3 id="2-1-チャレンジ発行-getchallenge">2-1. チャレンジ発行 (GetChallenge)<a hidden class="anchor" aria-hidden="true" href="#2-1-チャレンジ発行-getchallenge">#</a></h3>
+<ul>
+<li>scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成</li>
+<li>ChallengeResponse には一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる</li>
+</ul>
+<h3 id="2-2-register--recover">2-2. Register / Recover<a hidden class="anchor" aria-hidden="true" href="#2-2-register--recover">#</a></h3>
+<ul>
+<li>クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信</li>
+<li>サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行</li>
+<li>Register 時は初回発行、Recover 時は既存ノードの証明書再発行</li>
+<li>この証明書と秘密鍵で以降の操作を認証 (node_id ごとに厳密にアクセスを制限)</li>
+</ul>
+<h3 id="2-3-schedule--getnodeinfo">2-3. Schedule / GetNodeInfo<a hidden class="anchor" aria-hidden="true" href="#2-3-schedule--getnodeinfo">#</a></h3>
+<ul>
+<li>Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る</li>
+<li>既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオも)</li>
+</ul>
+<h3 id="2-4-接続操作">2-4. 接続・操作<a hidden class="anchor" aria-hidden="true" href="#2-4-接続操作">#</a></h3>
+<ul>
+<li>mTLS 認証情報 (device_cert, device_key) により、node.proto や greenlight.proto 内の RPC (支払い・チャンネル操作等) にアクセスできる</li>
+<li>署名が必要な操作 (例: チャネルオープン時のトランザクション署名など) は SignerEngine (HSMRequest) を通じて行われる</li>
+</ul>
+<hr>
+<h2 id="3-signer-フロー-hsmrequest--hsmservice">3. Signer フロー (HSMRequest / HsmService)<a hidden class="anchor" aria-hidden="true" href="#3-signer-フロー-hsmrequest--hsmservice">#</a></h2>
+<p><code>greenlight.proto</code> に定義される Node サービスには、HSM 関連の RPC が含まれています。これにより以下のようなシナリオで署名リクエストがやり取りされます。</p>
+<ol>
+<li>ノード (CLN) 側が秘密鍵操作を要求:
+<ul>
+<li>StreamHsmRequests によって、CLN が必要とするトランザクション署名等のリクエスト (HsmRequest) が送信される</li>
+</ul>
+</li>
+<li>Signer が応答生成:
+<ul>
+<li>別途動作するサイナー (たとえばローカルデバイスの鍵管理アプリ) が HsmRequest を受け取り、秘密鍵で署名や承認を行う</li>
+</ul>
+</li>
+<li>Node へ署名結果を返却:
+<ul>
+<li>HsmResponse に署名済みデータ (raw) を埋め、RespondHsmRequest などから戻す</li>
+</ul>
+</li>
+<li>CLN は署名付きトランザクション等を引き取り、実際の処理を進める</li>
+</ol>
+<p><code>greenlight.proto</code> 内の主な要素:</p>
+<ul>
+<li>HsmRequest
+<ul>
+<li>request_id: マッチング用識別子</li>
+<li>raw: 実際に署名対象として要求されるバイト列</li>
+<li>signer_state: サイナーが保持している状態バージョンや認可情報 (鍵・ポリシー)</li>
+</ul>
+</li>
+<li>HsmResponse
+<ul>
+<li>raw: 署名結果が含まれるバイト列</li>
+<li>error: 不正リクエストにおけるエラーメッセージ</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="4-cln-との連携">4. CLN との連携<a hidden class="anchor" aria-hidden="true" href="#4-cln-との連携">#</a></h2>
+<p>Scheduler.Service によってノード起動が要求されると、Greenlight インフラは内部で次の流れを踏みます:</p>
+<ol>
+<li>Scheduler からスケジュール要求を受け取る</li>
+<li>適切な c-lightning (CLN) インスタンスを確保し、ノード ID とネットワーク情報を紐づけ</li>
+<li>起動時や操作時に署名が必要な場合、CLN は Node サービスの StreamHsmRequests (HSMRequest) を介して外部サイナーにリクエスト</li>
+<li>サイナーは HsmResponse で署名を返す</li>
+<li>CLN は署名を取得し、トランザクション生成やチャネル操作などを実行</li>
+</ol>
+<hr>
+<h2 id="5-シーケンス図-mermaid">5. シーケンス図 (Mermaid)<a hidden class="anchor" aria-hidden="true" href="#5-シーケンス図-mermaid">#</a></h2>
+<pre class="mermaid">sequenceDiagram
+    participant Client as Client
+    participant Scheduler as Scheduler
+    participant Node as Node (CLN)
+    participant Signer as Signer/HSM
+
+    Client-&gt;&gt;Scheduler: GetChallenge(scope=REGISTER, node_id)
+    Scheduler--&gt;&gt;Client: ChallengeResponse(challenge)
+
+    Client-&gt;&gt;Scheduler: Register(署名付きchallenge, CSR...)
+    Scheduler--&gt;&gt;Client: RegistrationResponse(device_cert, device_key)
+
+    note over Client,Scheduler: 認証情報取得済。以降node_idに紐づくRPCが可能
+
+    Client-&gt;&gt;Scheduler: Schedule(node_id)
+    Scheduler--&gt;&gt;Node: CLNインスタンス起動
+    Scheduler--&gt;&gt;Client: NodeInfoResponse(grpc_uri)
+
+    note over Scheduler,Node: 必要に応じてノード起動
+
+    Client-&gt;&gt;Node: (mTLS認証) PayRequest, FundChannel 等
+    Node--&gt;&gt;Signer: HsmRequest(署名要求)
+    Signer--&gt;&gt;Node: HsmResponse(署名済みraw)
+
+    note over Node: 署名済トランザクションをCLNが送信/実行
+
+    Node--&gt;&gt;Client: 操作結果
+  </pre>
+<hr>
+<h2 id="7-mtls-と-hsm-の詳細">7. mTLS と HSM の詳細<a hidden class="anchor" aria-hidden="true" href="#7-mtls-と-hsm-の詳細">#</a></h2>
+<h3 id="7-1-mtls-の目的と構造">7-1. mTLS の目的と構造<a hidden class="anchor" aria-hidden="true" href="#7-1-mtls-の目的と構造">#</a></h3>
+<ul>
+<li>通常のTLS (サーバー証明書のみ) とは違い、サーバー/クライアント双方が証明書を提示し合う双方向認証を実施</li>
+<li>Greenlight では匿名用の&quot;NOBODY&quot;証明書を初期として、Register/Recover 成功後には node_id に特化したデバイス証明書が発行される</li>
+<li>この切り替えにより、クライアントが正しくノード秘密鍵を所持していることが担保され、他ノードへの不正アクセスを防止</li>
+</ul>
+<h4 id="mtls-シーケンス例-nobody--node特化証明書">mTLS シーケンス例 (Nobody → node特化証明書)<a hidden class="anchor" aria-hidden="true" href="#mtls-シーケンス例-nobody--node特化証明書">#</a></h4>
+<pre class="mermaid">sequenceDiagram
+    participant Client(Nobody) as Client (TLS:Nobody)
+    participant Scheduler as Scheduler Service
+    participant Signer as Local Signer
+
+    Client(Nobody)-&gt;&gt;Scheduler: GetChallenge(scope=REGISTER, node_id)
+    Scheduler--&gt;&gt;Client(Nobody): ChallengeResponse(challenge)
+
+    note over Client(Nobody): 認証なしで呼べるのは&lt;br&gt;Register/Recover関連のみ
+
+    Client(Nobody)-&gt;&gt;Signer: challenge署名を依頼
+    Signer--&gt;&gt;Client(Nobody): 署名済みchallenge
+
+    Client(Nobody)-&gt;&gt;Scheduler: Register(署名付きchallenge, CSR)
+    Scheduler--&gt;&gt;Client(Nobody): device_cert, device_key
+
+    note over Client(Nobody): node専用 cert/keyを獲得したら&lt;br&gt;TlsConfig.identity()によりアップグレード
+  </pre>
+<h3 id="7-2-hsm-signer-の必要性">7-2. HSM (Signer) の必要性<a hidden class="anchor" aria-hidden="true" href="#7-2-hsm-signer-の必要性">#</a></h3>
+<ul>
+<li>c-lightning でのチャネル開閉や on-chain 送金時に秘密鍵署名が不可欠</li>
+<li>セキュリティ的に秘密鍵をCLN本体へ渡すのではなく、HSM (外部サイナー) で一時的に署名のみ実施</li>
+<li>Greenlight の Signer 実装では、Scheduler 経由のチャレンジ (node_id所有証明) や、起動時の任意リクエスト (init_msg) を認可ルールに基づき署名する</li>
+</ul>
+<h4 id="hsmサインフロー-clnsigner">HSMサインフロー: CLN→Signer<a hidden class="anchor" aria-hidden="true" href="#hsmサインフロー-clnsigner">#</a></h4>
+<pre class="mermaid">sequenceDiagram
+    participant Node(CLN) as Node (CLN)
+    participant Signer as Local Signer(HSM)
+    participant TLS as TlsConfig
+
+    Node(CLN)-&gt;&gt;Signer: HsmRequest(署名に必要なrawデータ)
+    Signer-&gt;&gt;Signer: 内部ポリシーで可否判断&lt;br&gt;秘密鍵保護下で署名
+    Signer--&gt;&gt;Node(CLN): HsmResponse(署名付きraw)
+    note over Node(CLN): 受け取った署名でTXを作成し、&lt;br&gt;ネットワーク送信
+  </pre>
+<h3 id="7-3-greenlightlibsgl-client-のソース連携">7-3. greenlight/libs/gl-client のソース連携<a hidden class="anchor" aria-hidden="true" href="#7-3-greenlightlibsgl-client-のソース連携">#</a></h3>
+<ul>
+<li>[tls.rs]
+<ul>
+<li>認証局CA, nobody証明書, device_cert などをロードし、ClientTlsConfig を生成</li>
+<li>identity() メソッドで anonymous からnode固有証明書に切り替え</li>
+</ul>
+</li>
+<li>[scheduler.rs]
+<ul>
+<li>Register() や Recover() で Scheduler.GetChallenge を呼び出し、チャレンジ応答を signer で署名</li>
+<li>Node専用TLS証明書を受け取ったら TlsConfig.identity() で差し替える流れ</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="8-pairing-の詳細">8. Pairing の詳細<a hidden class="anchor" aria-hidden="true" href="#8-pairing-の詳細">#</a></h2>
+<h3 id="8-1-pairingサービス-schedulerproto">8-1. Pairingサービス (scheduler.proto)<a hidden class="anchor" aria-hidden="true" href="#8-1-pairingサービス-schedulerproto">#</a></h3>
+<p>pairing.proto 定義 (scheduler.proto 末尾) には、以下のメソッドが定義されています:</p>
+<ol>
+<li>
+<p>PairDevice(PairDeviceRequest) returns (PairDeviceResponse)</p>
+<ul>
+<li>新規デバイスが自分の device_id, CSR (証明書署名要求), デバイス名, restrictions などをサーバに送信し、ペアリングセッションを作成</li>
+<li>ここではサーバが一時的なセッションを識別し、新規デバイスがノードに加わる準備をする</li>
+</ul>
+</li>
+<li>
+<p>GetPairingData(GetPairingDataRequest) returns (GetPairingDataResponse)</p>
+<ul>
+<li>旧デバイス(既にノードへの署名権限を持つデバイス)側で、このペアリングセッションのデータを取得し、人間が新デバイスを承認するか判断できるように活用</li>
+<li>device_id, device_name, description などが含まれ、ユーザに「このデバイスほんとに許可する？」を確認する材料となる</li>
+</ul>
+</li>
+<li>
+<p>ApprovePairing(ApprovePairingRequest) returns (greenlight.Empty)</p>
+<ul>
+<li>旧デバイス(サイナー)が最終承認を行い、サーバは新デバイスに対して node_id に紐づく TLS 証明書等を発行</li>
+<li>旧デバイスの署名や timestamp, rune (制限情報) などを含み、Scheduler からさらに SignerRequestsStream などを介してポリシーチェック・署名要求が飛ぶ可能性がある</li>
+</ul>
+</li>
+</ol>
+<h3 id="8-2-主要メッセージ-proto-概要">8-2. 主要メッセージ (proto) 概要<a hidden class="anchor" aria-hidden="true" href="#8-2-主要メッセージ-proto-概要">#</a></h3>
+<ul>
+<li>
+<p>PairDeviceRequest:</p>
+<ul>
+<li>string device_id: 新規デバイスのパブリックキー</li>
+<li>bytes csr: 新しいデバイスに対して署名すべきCSR</li>
+<li>string device_name: TLS証明書 CN の一部になる名前</li>
+<li>string description: 人手監査用の説明</li>
+<li>string restrictions: (将来的な拡張含む) Runeの制約表現</li>
+</ul>
+</li>
+<li>
+<p>PairDeviceResponse:</p>
+<ul>
+<li>同様に device_cert, device_key, rune, creds 等が返却される可能性がある</li>
+</ul>
+</li>
+<li>
+<p>ApprovePairingRequest:</p>
+<ul>
+<li>string device_id: 対象となる新デバイスのID</li>
+<li>uint64 timestamp: 承認した時刻</li>
+<li>string device_name, string restrictions</li>
+<li>bytes sig: 旧デバイスによる承認署名</li>
+<li>string rune: 旧デバイス自身が所有するRune(=サイン権限の証明)</li>
+</ul>
+</li>
+</ul>
+<h3 id="8-3-シーケンス図-mermaid---pairingフロー">8-3. シーケンス図 (Mermaid) - Pairingフロー<a hidden class="anchor" aria-hidden="true" href="#8-3-シーケンス図-mermaid---pairingフロー">#</a></h3>
+<pre class="mermaid">sequenceDiagram
+    participant NewDevice as New Device
+    participant OldDevice as Old Device (signer)
+    participant Scheduler as Scheduler
+    participant SignerRequests as SignerRequestsStream
+
+    NewDevice-&gt;&gt;Scheduler: PairDevice(PairDeviceRequest)
+    note over NewDevice,Scheduler: 新規デバイス&lt;br&gt;ペアリングセッション生成
+
+    OldDevice-&gt;&gt;Scheduler: GetPairingData(GetPairingDataRequest)
+    Scheduler--&gt;&gt;OldDevice: GetPairingDataResponse(device_id, description, restrictions, ...)
+
+    note over OldDevice: ユーザが手動で承認検討&lt;br&gt; (このデバイスは正当か？)
+
+    OldDevice-&gt;&gt;Scheduler: ApprovePairing(ApprovePairingRequest)
+    note over Scheduler: ApprovePairingを&lt;br&gt;SignerRequestsStreamへ通知
+
+    Scheduler--&gt;&gt;SignerRequests: SignerRequest(ApprovePairingRequest付き)
+    SignerRequests--&gt;&gt;Scheduler: SignerResponse(承認/拒否)
+
+    note over Scheduler: サイナーで承認完了すると&lt;br&gt;新規デバイスのTLS証明書を発行
+
+    Scheduler--&gt;&gt;NewDevice: PairDeviceResponse(デバイス証明書, key, rune, creds)
+
+    note over NewDevice: これにより&lt;br&gt;ノードアクセス権限を更新
+  </pre>
+<h3 id="8-4-流れのポイント">8-4. 流れのポイント<a hidden class="anchor" aria-hidden="true" href="#8-4-流れのポイント">#</a></h3>
+<ul>
+<li>新規デバイスが PairDevice で CSRをアップロード → Scheduler でセッション確保</li>
+<li>旧デバイスが GetPairingData でそのセッション情報を取得し、ApprovePairing で最終承認</li>
+<li>実際の承認処理はサイナー (旧デバイス上の署名モジュール) によるポリシーチェック後に進行</li>
+<li>成功すると、新デバイスは Scheduler から署名済の TLS cert/key + rune を受け取り、既存ノードと同等の(または制限付きの)操作権限を得る</li>
+</ul>
+<hr>
+<p>これらにより、既に運用中のノードに対して新しいデバイスが “ペアリング” を行い、秘密鍵を共有せずに権限のみ安全に移譲を受ける仕組みが成り立ちます。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">blog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
