@@ -1,34 +1,34 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Wed, 19 Mar 2025 11:07:52 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Greenlight SchedulerとSignerの関係性</title><link>https://yusukeshimizu.github.io/blog/posts/2025-03-19/</link><pubDate>Wed, 19 Mar 2025 11:07:52 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/2025-03-19/</guid><description>&lt;p>&lt;a href="https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient">greenlight proto&lt;/a> をベースに、gpt o1に解説させたものに修正を加えています。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Wed, 19 Mar 2025 11:07:52 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Greenlight SchedulerとSignerの関係性</title><link>https://yusukeshimizu.github.io/blog/posts/2025-03-19/</link><pubDate>Wed, 19 Mar 2025 11:07:52 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/2025-03-19/</guid><description>&lt;p>&lt;a href="https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient">greenlight proto&lt;/a> をベースにした解説をもとに、補足修正を加えた。&lt;/p>
 &lt;h2 id="1-概要">1. 概要&lt;/h2>
-&lt;p>Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) を中心に、ノード管理フローおよび署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示します。&lt;br>
-本稿末尾に Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えて解説します。&lt;/p>
-&lt;p>Scheduler は、Greenlight 上でノードをホストし管理するためのエンドポイントを提供するサービスです。&lt;br>
-一方、Node (greenlight.proto) はノードへのインタラクション (ログ取得・支払い・HSM リクエスト等) を定義し、Signer 連携 (HsmRequest / RespondHsmRequest) を介して秘密鍵操作や承認を行います。&lt;/p>
-&lt;p>ノードは基本的に c-lightning (CLN) インスタンスで構成され、Scheduler と Signer の組み合わせで外部アクセス(API)をコントロールします。&lt;/p>
+&lt;p>Scheduler (scheduler.proto) と Signer 機構 (greenlight.proto の Node サービス領域内に含まれる HSM 連携など) に基づき、ノード管理フローと署名リクエストが c-lightning (CLN) に到達するまでのシーケンスを示す。&lt;br>
+末尾には Pairing (ペアリング) 機能の proto 定義と詳細シーケンスも加えた。&lt;/p>
+&lt;p>Scheduler は、Greenlight 上でノードをホストし管理するエンドポイントを提供するサービスである。&lt;br>
+一方、Node (greenlight.proto) はノードへのインタラクション (ログ取得・支払い・HSM リクエスト等) を定義し、Signer 連携 (HsmRequest / RespondHsmRequest) を通じて秘密鍵操作や承認を行う。&lt;br>
+ノードは基本的に c-lightning (CLN) インスタンスで構成し、Scheduler と Signer の組み合わせで外部アクセス(API)を制御する。&lt;/p>
 &lt;hr>
 &lt;h2 id="2-ノード登録とスケジューリングフロー">2. ノード登録とスケジューリングフロー&lt;/h2>
 &lt;h3 id="2-1-チャレンジ発行-getchallenge">2-1. チャレンジ発行 (GetChallenge)&lt;/h3>
 &lt;ul>
 &lt;li>scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成&lt;/li>
-&lt;li>ChallengeResponse には一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる&lt;/li>
+&lt;li>ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる&lt;/li>
 &lt;/ul>
 &lt;h3 id="2-2-register--recover">2-2. Register / Recover&lt;/h3>
 &lt;ul>
 &lt;li>クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信&lt;/li>
 &lt;li>サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行&lt;/li>
 &lt;li>Register 時は初回発行、Recover 時は既存ノードの証明書再発行&lt;/li>
-&lt;li>この証明書と秘密鍵で以降の操作を認証 (node_id ごとに厳密にアクセスを制限)&lt;/li>
+&lt;li>以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる&lt;/li>
 &lt;/ul>
 &lt;h3 id="2-3-schedule--getnodeinfo">2-3. Schedule / GetNodeInfo&lt;/h3>
 &lt;ul>
 &lt;li>Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る&lt;/li>
-&lt;li>既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオも)&lt;/li>
+&lt;li>既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある)&lt;/li>
 &lt;/ul>
 &lt;h3 id="2-4-接続操作">2-4. 接続・操作&lt;/h3>
 &lt;ul>
-&lt;li>mTLS 認証情報 (device_cert, device_key) により、node.proto や greenlight.proto 内の RPC (支払い・チャンネル操作等) にアクセスできる&lt;/li>
-&lt;li>署名が必要な操作 (例: チャネルオープン時のトランザクション署名など) は SignerEngine (HSMRequest) を通じて行われる&lt;/li>
+&lt;li>mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる&lt;/li>
+&lt;li>署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う&lt;/li>
 &lt;/ul>
 &lt;hr>
 &lt;h2 id="3-signer-フロー-hsmrequest--hsmservice">3. Signer フロー (HSMRequest / HsmService)&lt;/h2>
-&lt;p>&lt;code>greenlight.proto&lt;/code> に定義される Node サービスには、HSM 関連の RPC が含まれています。これにより以下のようなシナリオで署名リクエストがやり取りされます。&lt;/p></description></item></channel></rss>
+&lt;p>&lt;code>greenlight.proto&lt;/code> に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:&lt;/p></description></item></channel></rss>
