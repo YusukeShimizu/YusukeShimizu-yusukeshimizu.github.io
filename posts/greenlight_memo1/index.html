@@ -1,0 +1,509 @@
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Greenlight SchedulerとSignerの関係性 | blog</title>
+<meta name=keywords content><meta name=description content="greenlight proto をベースにした解説。
+greenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。
+この記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。
+簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。
+自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。
+
+
+
+
+  
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(
+S
+e
+l
+f
+U
+S
+-
+s
+i
+H
+e
+g
+o
+r
+n
+s
+C
+e
+t
+l
+r
+e
+i
+d
+e
+/
+)
+n
+t
+H
+S
+(
+M
+w
+)
+i
+t
+h
+i
+n
+t
+e
+g
+r
+a
+t
+e
+d
+(
+M
+a
+n
+a
+g
+e
+A
+P
+I
+c
+a
+l
+l
+)
+S
+(
+c
+G
+h
+C
+r
+e
+L
+e
+d
+(
+N
+e
+u
+N
+n
+l
+o
+(
+l
+e
+d
+c
+i
+r
+e
+-
+g
+l
+h
+(
+m
+i
+t
+C
+a
+g
+l
+n
+h
+H
+o
+a
+t
+o
+s
+g
+n
+s
+e
+e
+i
+t
+d
+m
+n
+e
+e
+g
+d
+S
+n
++
+)
+o
+t
+p
+u
+)
+l
+r
+u
+c
+g
+e
+i
+)
+n
+)
+
+
+    
+  
+
+
+ノード登録とスケジューリングフロー
+チャレンジ発行 (GetChallenge)
+
+scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成
+ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる
+
+Register / Recover
+
+クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信
+サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行
+Register 時は初回発行、Recover 時は既存ノードの証明書再発行
+以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる
+
+Schedule / GetNodeInfo
+
+Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る
+既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある)
+
+接続・操作
+
+mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる
+署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う
+
+
+Signer フロー (HSMRequest / HsmService)
+greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:"><meta name=author content><link rel=canonical href=https://yusukeshimizu.github.io/blog/posts/greenlight_memo1/><link crossorigin=anonymous href=/blog/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF+13Dyqob6ASlTrTye8=" rel="preload stylesheet" as=style><link rel=icon href=https://yusukeshimizu.github.io/blog/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yusukeshimizu.github.io/blog/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yusukeshimizu.github.io/blog/favicon-32x32.png><link rel=apple-touch-icon href=https://yusukeshimizu.github.io/blog/apple-touch-icon.png><link rel=mask-icon href=https://yusukeshimizu.github.io/blog/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://yusukeshimizu.github.io/blog/posts/greenlight_memo1/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><script src=https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js></script><script>const elementCode=".mermaid",loadMermaid=function(e){mermaid.initialize({theme:e}),mermaid.init({theme:e},document.querySelectorAll(elementCode))},saveOriginalData=function(){return new Promise((e,t)=>{try{var n=document.querySelectorAll(elementCode),s=n.length;n.forEach(t=>{t.setAttribute("data-original-code",t.innerHTML),s--,s==0&&e()})}catch(e){t(e)}})},resetProcessed=function(){return new Promise((e,t)=>{try{var n=document.querySelectorAll(elementCode),s=n.length;n.forEach(t=>{t.getAttribute("data-original-code")!=null&&(t.removeAttribute("data-processed"),t.innerHTML=t.getAttribute("data-original-code")),s--,s==0&&e()})}catch(e){t(e)}})};saveOriginalData().catch(console.error);let statusTheme=localStorage.getItem("pref-theme");statusTheme=="dark"&&resetProcessed().then(loadMermaid("dark")).catch(console.error),statusTheme=="light"&&resetProcessed().then(loadMermaid("neutral")).catch(console.error),document.getElementById("theme-toggle").addEventListener("click",()=>{resetProcessed().then(loadMermaid(mermaid.mermaidAPI.getConfig().theme=="neutral"?"dark":"neutral")).catch(console.error)})</script><meta property="og:url" content="https://yusukeshimizu.github.io/blog/posts/greenlight_memo1/"><meta property="og:site_name" content="blog"><meta property="og:title" content="Greenlight SchedulerとSignerの関係性"><meta property="og:description" content="greenlight proto をベースにした解説。
+greenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。
+この記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。
+簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。
+自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。
+( S e l f U S - s i H e g o r n s C e t l r e i d e / ) n t H S ( M w ) i t h i n t e g r a t e d ( M a n a g e A P I c a l l ) S ( c G h C r e L e d ( N e u N n l o ( l e d c i r e - g l h ( m i t C a g l n h H o a t o s g n s e e i t d m n e e g d S n + ) o t p u ) l r u c g e i ) n ) ノード登録とスケジューリングフロー チャレンジ発行 (GetChallenge) scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成 ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる Register / Recover クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信 サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行 Register 時は初回発行、Recover 時は既存ノードの証明書再発行 以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる Schedule / GetNodeInfo Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る 既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある) 接続・操作 mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる 署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う Signer フロー (HSMRequest / HsmService) greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-03-19T11:07:52+09:00"><meta property="article:modified_time" content="2025-03-19T11:07:52+09:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Greenlight SchedulerとSignerの関係性"><meta name=twitter:description content="greenlight proto をベースにした解説。
+greenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。
+この記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。
+簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。
+自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。
+
+
+
+
+  
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(
+S
+e
+l
+f
+U
+S
+-
+s
+i
+H
+e
+g
+o
+r
+n
+s
+C
+e
+t
+l
+r
+e
+i
+d
+e
+/
+)
+n
+t
+H
+S
+(
+M
+w
+)
+i
+t
+h
+i
+n
+t
+e
+g
+r
+a
+t
+e
+d
+(
+M
+a
+n
+a
+g
+e
+A
+P
+I
+c
+a
+l
+l
+)
+S
+(
+c
+G
+h
+C
+r
+e
+L
+e
+d
+(
+N
+e
+u
+N
+n
+l
+o
+(
+l
+e
+d
+c
+i
+r
+e
+-
+g
+l
+h
+(
+m
+i
+t
+C
+a
+g
+l
+n
+h
+H
+o
+a
+t
+o
+s
+g
+n
+s
+e
+e
+i
+t
+d
+m
+n
+e
+e
+g
+d
+S
+n
++
+)
+o
+t
+p
+u
+)
+l
+r
+u
+c
+g
+e
+i
+)
+n
+)
+
+
+    
+  
+
+
+ノード登録とスケジューリングフロー
+チャレンジ発行 (GetChallenge)
+
+scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成
+ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる
+
+Register / Recover
+
+クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信
+サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行
+Register 時は初回発行、Recover 時は既存ノードの証明書再発行
+以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる
+
+Schedule / GetNodeInfo
+
+Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る
+既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある)
+
+接続・操作
+
+mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる
+署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う
+
+
+Signer フロー (HSMRequest / HsmService)
+greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yusukeshimizu.github.io/blog/posts/"},{"@type":"ListItem","position":2,"name":"Greenlight SchedulerとSignerの関係性","item":"https://yusukeshimizu.github.io/blog/posts/greenlight_memo1/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Greenlight SchedulerとSignerの関係性","name":"Greenlight SchedulerとSignerの関係性","description":"greenlight proto をベースにした解説。\ngreenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。\nこの記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。\n簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。\n自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。\n( S e l f U S - s i H e g o r n s C e t l r e i d e / ) n t H S ( M w ) i t h i n t e g r a t e d ( M a n a g e A P I c a l l ) S ( c G h C r e L e d ( N e u N n l o ( l e d c i r e - g l h ( m i t C a g l n h H o a t o s g n s e e i t d m n e e g d S n + ) o t p u ) l r u c g e i ) n ) ノード登録とスケジューリングフロー チャレンジ発行 (GetChallenge) scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成 ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる Register / Recover クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信 サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行 Register 時は初回発行、Recover 時は既存ノードの証明書再発行 以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる Schedule / GetNodeInfo Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る 既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある) 接続・操作 mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる 署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う Signer フロー (HSMRequest / HsmService) greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:\n","keywords":[],"articleBody":"greenlight proto をベースにした解説。\ngreenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。\nこの記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。\n簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。\n自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。\n( S e l f U S - s i H e g o r n s C e t l r e i d e / ) n t H S ( M w ) i t h i n t e g r a t e d ( M a n a g e A P I c a l l ) S ( c G h C r e L e d ( N e u N n l o ( l e d c i r e - g l h ( m i t C a g l n h H o a t o s g n s e e i t d m n e e g d S n + ) o t p u ) l r u c g e i ) n ) ノード登録とスケジューリングフロー チャレンジ発行 (GetChallenge) scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成 ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる Register / Recover クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信 サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行 Register 時は初回発行、Recover 時は既存ノードの証明書再発行 以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる Schedule / GetNodeInfo Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る 既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある) 接続・操作 mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる 署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う Signer フロー (HSMRequest / HsmService) greenlight.proto に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:\nノード (CLN) 側が秘密鍵操作を要求 StreamHsmRequests によって署名リクエスト (HsmRequest) が通知される Signer が応答生成 ローカルデバイスの鍵管理アプリなどが HsmRequest を受け取り、秘密鍵署名や承認処理を実施 Node へ署名結果を返却 HsmResponse に署名済みバイト列 (raw) を格納し、RespondHsmRequest などから返却 CLN は署名付きトランザクション等を用い、実際の処理を進める greenlight.proto の主な要素:\nHsmRequest request_id: リクエストごとの識別子 raw: 実際の署名対象となるバイト列 signer_state: 鍵やポリシーなどサイナー側で保持する状態や認可情報 HsmResponse raw: 署名済みバイト列 error: 不正リクエスト時のエラーメッセージ CLN との連携 Scheduler.Service によってノード起動が要求されると、Greenlight インフラは内部で次の手順を踏む:\nScheduler がスケジューリング要求を受理 対応する c-lightning (CLN) インスタンスを確保し、ノード ID とネットワーク情報を紐づけ 起動または操作の過程で署名が必要な場合、CLN は Node サービスの StreamHsmRequests (HSMRequest) で外部サイナーへ署名リクエストを送る サイナーが HsmResponse で署名を返す CLN は署名付トランザクションを取得し、実際のチャネル操作などを実行 シーケンス図 (Mermaid) sequenceDiagram participant Client as Client participant Scheduler as Scheduler participant Node as Node (CLN) participant Signer as Signer/HSM Client-\u003e\u003eScheduler: GetChallenge(scope=REGISTER, node_id) Scheduler--\u003e\u003eClient: ChallengeResponse(challenge) Client-\u003e\u003eScheduler: Register(署名付きchallenge, CSR...) Scheduler--\u003e\u003eClient: RegistrationResponse(device_cert, device_key) note over Client,Scheduler: 認証情報を取得後、\nnode_id単位で操作可能 Client-\u003e\u003eScheduler: Schedule(node_id) Scheduler--\u003e\u003eNode: CLNインスタンス起動 Scheduler--\u003e\u003eClient: NodeInfoResponse(grpc_uri) note over Scheduler,Node: ノードを起動済みならGetNodeInfoで取得 Client-\u003e\u003eNode: (mTLS認証) PayRequest, FundChannel 等 Node--\u003e\u003eSigner: HsmRequest(署名要求) Signer--\u003e\u003eNode: HsmResponse(署名済みraw) note over Node: 署名済みTXをCLNが送信し、\nネットワークで処理を実行 Node--\u003e\u003eClient: 操作結果 mTLS と HSM の詳細 mTLS の目的と構造 通常のTLS とは異なり、サーバーとクライアントの双方が証明書を提示する双方向認証を実施 Greenlight では匿名用の“NOBODY”証明書から開始し、Register/Recover 成功後にノード専用のデバイス証明書を発行する クライアントがノード秘密鍵を正当に所有していることを担保し、他ノードへの不正アクセスを防ぐ仕組み mTLS シーケンス例 (Nobody → node特化証明書) sequenceDiagram participant Client(Nobody) as Client (TLS:Nobody) participant Scheduler as Scheduler Service participant Signer as Local Signer Client(Nobody)-\u003e\u003eScheduler: GetChallenge(scope=REGISTER, node_id) Scheduler--\u003e\u003eClient(Nobody): ChallengeResponse(challenge) note over Client(Nobody): 認証不要で呼べるのは\nRegister/Recover関連のみ Client(Nobody)-\u003e\u003eSigner: challenge署名を依頼 Signer--\u003e\u003eClient(Nobody): 署名付きchallenge Client(Nobody)-\u003e\u003eScheduler: Register(署名付きchallenge, CSR) Scheduler--\u003e\u003eClient(Nobody): device_cert, device_key note over Client(Nobody): node専用 cert/keyを取得し\nTlsConfig.identity()でアップグレード HSM (Signer) の必要性 on-chain 送金やチャネル開閉には秘密鍵署名が必須 セキュリティ上、秘密鍵を CLN 本体に渡さず、HSM (外部サイナー) が署名だけを担当 Greenlight の Signer 実装では、Scheduler 経由のチャレンジや起動時の認可ルールを踏まえ、秘密鍵を保持するサイナーが安全に署名を行う HSM サインフロー: CLN→Signer sequenceDiagram participant Node(CLN) as Node (CLN) participant Signer as Local Signer(HSM) participant TLS as TlsConfig Node(CLN)-\u003e\u003eSigner: HsmRequest(署名対象raw) Signer-\u003e\u003eSigner: 内部ポリシーで確認し、秘密鍵で署名 Signer--\u003e\u003eNode(CLN): HsmResponse(署名済みraw) note over Node(CLN): 得られた署名でTXを作成し、\nネットワーク送信 greenlight/libs-gl-client のソース連携 [tls.rs] CA, nobody証明書, device_cert などをロードして ClientTlsConfig を生成 identity() メソッドで anonymous からノード固有証明書に切り替える [scheduler.rs] Register() や Recover() を介して Scheduler.GetChallenge → 署名応答 → TLS証明書の発行という流れを実装 ノード専用 TLS 証明書を受け取ったら TlsConfig.identity() で差し替える Pairing の詳細 Pairingサービス (scheduler.proto) pairing.proto (scheduler.proto 末尾) には次のメソッドが定義されている:\nPairDevice(PairDeviceRequest) returns (PairDeviceResponse) 新規デバイスが device_id, CSR, デバイス名, restrictions などをサーバに送り、ペアリングセッションを作成 サーバは一時的セッションを識別し、新規デバイスへのノードアクセス手続を下準備 GetPairingData(GetPairingDataRequest) returns (GetPairingDataResponse) 既存デバイス (すでにノード署名権限を持つ) がセッション情報を取得し、新規デバイスを承認するか判断するためのデータを入手 ApprovePairing(ApprovePairingRequest) returns (greenlight.Empty) 既存デバイスが最終承認し、サーバは新規デバイス向けに TLS 証明書などを最終発行 Rune (制限情報) を付与し、SignerRequestsStream がポリシーチェックや署名承認を実行する場合もある 主要メッセージ (proto) 概要 PairDeviceRequest: string device_id: 新規デバイスのパブリックキー bytes csr: CSR (証明書署名要求) string device_name: TLS証明書の CN 名の一部 string description: 人手確認用メッセージ string restrictions: Rune など制約情報 PairDeviceResponse: device_cert, device_key, rune, creds などを返却し、新規デバイスがノードへアクセス可能になる ApprovePairingRequest: string device_id: 新規デバイスのID uint64 timestamp: 承認時刻 string device_name, string restrictions bytes sig: 既存デバイス (サイナー) による承認署名 string rune: 承認に用いるRune シーケンス図 (Mermaid) - Pairingフロー sequenceDiagram participant NewDevice as New Device participant OldDevice as Old Device (signer) participant Scheduler as Scheduler participant SignerRequests as SignerRequestsStream NewDevice-\u003e\u003eScheduler: PairDevice(PairDeviceRequest) note over NewDevice,Scheduler: 新規デバイスがペアリング用セッションを作成 OldDevice-\u003e\u003eScheduler: GetPairingData(GetPairingDataRequest) Scheduler--\u003e\u003eOldDevice: GetPairingDataResponse(device_id, description, restrictions, ...) note over OldDevice: 実際にユーザが確認し、承認を判断 OldDevice-\u003e\u003eScheduler: ApprovePairing(ApprovePairingRequest) note over Scheduler: 承認内容を\nSignerRequestsStreamへ通知 Scheduler--\u003e\u003eSignerRequests: SignerRequest(ApprovePairingRequest) SignerRequests--\u003e\u003eScheduler: SignerResponse(承認成功または拒否) note over Scheduler: 承認完了後に\n新規デバイスへTLS証明書を発行 Scheduler--\u003e\u003eNewDevice: PairDeviceResponse(device_cert, device_key, rune, creds) note over NewDevice: ノード操作権限を\n新規デバイスで取得 流れのポイント 新規デバイスは PairDevice で CSR をアップロードし、サーバ側でセッションを確保 既存デバイスが GetPairingData で情報を取り、ApprovePairing で最終承認 サイナー (既存デバイスの署名モジュール) が SignerRequestsStream で承認処理を行い、新規デバイスへ TLS cert/key と rune を発行 新規デバイスはノードと同等 (または制限付き) の操作を取得し、秘密鍵を共有することなく権限移譲を実現する ","wordCount":"660","inLanguage":"en","datePublished":"2025-03-19T11:07:52+09:00","dateModified":"2025-03-19T11:07:52+09:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://yusukeshimizu.github.io/blog/posts/greenlight_memo1/"},"publisher":{"@type":"Organization","name":"blog","logo":{"@type":"ImageObject","url":"https://yusukeshimizu.github.io/blog/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://yusukeshimizu.github.io/blog/ accesskey=h title="blog (Alt + H)">blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme"><svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">Greenlight SchedulerとSignerの関係性</h1><div class=post-meta><span title='2025-03-19 11:07:52 +0900 +0900'>March 19, 2025</span></div></header><div class=post-content><p><a href=https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient>greenlight proto</a> をベースにした解説。</p><p>greenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。<br>この記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。<br>簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。<br>自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。</p><div class="goat svg-container"><svg font-family="Menlo,Lucida Console,monospace" viewBox="0 0 744 185"><g transform="translate(8,16)"><path d="M16 32H304" fill="none" stroke="currentcolor"/><path d="M496 32H728" fill="none" stroke="currentcolor"/><path d="M320 48H480" fill="none" stroke="currentcolor"/><path d="M496 64H608" fill="none" stroke="currentcolor"/><path d="M608 64H728" fill="none" stroke="currentcolor"/><path d="M16 80H304" fill="none" stroke="currentcolor"/><path d="M520 128H720" fill="none" stroke="currentcolor"/><path d="M304 144H488" fill="none" stroke="currentcolor"/><path d="M520 160h96" fill="none" stroke="currentcolor"/><path d="M616 160H720" fill="none" stroke="currentcolor"/><path d="M16 32V80" fill="none" stroke="currentcolor"/><path d="M296 96v48" fill="none" stroke="currentcolor"/><path d="M304 32V80" fill="none" stroke="currentcolor"/><path d="M496 32V64" fill="none" stroke="currentcolor"/><path d="M520 128v32" fill="none" stroke="currentcolor"/><path d="M608 64V80" fill="none" stroke="currentcolor"/><path d="M720 128v32" fill="none" stroke="currentcolor"/><path d="M728 32V64" fill="none" stroke="currentcolor"/><path d="M296 88v8" fill="none" stroke="currentcolor"/><polygon points="488.000000,48.000000 476.000000,42.400002 476.000000,53.599998" fill="currentcolor" transform="rotate(0.000000, 480.000000, 48.000000)"/><polygon points="496.000000,144.000000 484.000000,138.399994 484.000000,149.600006" fill="currentcolor" transform="rotate(0.000000, 488.000000, 144.000000)"/><path d="M608 112v8" fill="none" stroke="currentcolor"/><polygon points="624.000000,112.000000 612.000000,106.400002 612.000000,117.599998" fill="currentcolor" transform="rotate(90.000000, 608.000000, 112.000000)"/><text text-anchor="middle" x="0" y="4" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="8" y="4" fill="currentcolor" style="font-size:1em">S</text><text text-anchor="middle" x="16" y="4" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="24" y="4" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="32" y="4" fill="currentcolor" style="font-size:1em">f</text><text text-anchor="middle" x="32" y="52" fill="currentcolor" style="font-size:1em">U</text><text text-anchor="middle" x="32" y="68" fill="currentcolor" style="font-size:1em">S</text><text text-anchor="middle" x="40" y="4" fill="currentcolor" style="font-size:1em">-</text><text text-anchor="middle" x="40" y="52" fill="currentcolor" style="font-size:1em">s</text><text text-anchor="middle" x="40" y="68" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="48" y="4" fill="currentcolor" style="font-size:1em">H</text><text text-anchor="middle" x="48" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="48" y="68" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="56" y="4" fill="currentcolor" style="font-size:1em">o</text><text text-anchor="middle" x="56" y="52" fill="currentcolor" style="font-size:1em">r</text><text text-anchor="middle" x="56" y="68" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="64" y="4" fill="currentcolor" style="font-size:1em">s</text><text text-anchor="middle" x="64" y="52" fill="currentcolor" style="font-size:1em">C</text><text text-anchor="middle" x="64" y="68" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="72" y="4" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="72" y="52" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="72" y="68" fill="currentcolor" style="font-size:1em">r</text><text text-anchor="middle" x="80" y="4" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="80" y="52" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="88" y="4" fill="currentcolor" style="font-size:1em">d</text><text text-anchor="middle" x="88" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="88" y="68" fill="currentcolor" style="font-size:1em">/</text><text text-anchor="middle" x="96" y="4" fill="currentcolor" style="font-size:1em">)</text><text text-anchor="middle" x="96" y="52" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="104" y="52" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="104" y="68" fill="currentcolor" style="font-size:1em">H</text><text text-anchor="middle" x="112" y="68" fill="currentcolor" style="font-size:1em">S</text><text text-anchor="middle" x="120" y="52" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="120" y="68" fill="currentcolor" style="font-size:1em">M</text><text text-anchor="middle" x="128" y="52" fill="currentcolor" style="font-size:1em">w</text><text text-anchor="middle" x="128" y="68" fill="currentcolor" style="font-size:1em">)</text><text text-anchor="middle" x="136" y="52" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="144" y="52" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="152" y="52" fill="currentcolor" style="font-size:1em">h</text><text text-anchor="middle" x="168" y="52" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="176" y="52" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="184" y="52" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="192" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="200" y="52" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="208" y="52" fill="currentcolor" style="font-size:1em">r</text><text text-anchor="middle" x="216" y="52" fill="currentcolor" style="font-size:1em">a</text><text text-anchor="middle" x="224" y="52" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="232" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="240" y="52" fill="currentcolor" style="font-size:1em">d</text><text text-anchor="middle" x="336" y="36" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="344" y="36" fill="currentcolor" style="font-size:1em">M</text><text text-anchor="middle" x="352" y="36" fill="currentcolor" style="font-size:1em">a</text><text text-anchor="middle" x="360" y="36" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="368" y="36" fill="currentcolor" style="font-size:1em">a</text><text text-anchor="middle" x="376" y="36" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="384" y="36" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="400" y="36" fill="currentcolor" style="font-size:1em">A</text><text text-anchor="middle" x="408" y="36" fill="currentcolor" style="font-size:1em">P</text><text text-anchor="middle" x="416" y="36" fill="currentcolor" style="font-size:1em">I</text><text text-anchor="middle" x="432" y="36" fill="currentcolor" style="font-size:1em">c</text><text text-anchor="middle" x="440" y="36" fill="currentcolor" style="font-size:1em">a</text><text text-anchor="middle" x="448" y="36" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="456" y="36" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="464" y="36" fill="currentcolor" style="font-size:1em">)</text><text text-anchor="middle" x="512" y="52" fill="currentcolor" style="font-size:1em">S</text><text text-anchor="middle" x="520" y="4" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="520" y="52" fill="currentcolor" style="font-size:1em">c</text><text text-anchor="middle" x="528" y="4" fill="currentcolor" style="font-size:1em">G</text><text text-anchor="middle" x="528" y="52" fill="currentcolor" style="font-size:1em">h</text><text text-anchor="middle" x="528" y="148" fill="currentcolor" style="font-size:1em">C</text><text text-anchor="middle" x="536" y="4" fill="currentcolor" style="font-size:1em">r</text><text text-anchor="middle" x="536" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="536" y="148" fill="currentcolor" style="font-size:1em">L</text><text text-anchor="middle" x="544" y="4" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="544" y="52" fill="currentcolor" style="font-size:1em">d</text><text text-anchor="middle" x="544" y="100" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="544" y="148" fill="currentcolor" style="font-size:1em">N</text><text text-anchor="middle" x="552" y="4" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="552" y="52" fill="currentcolor" style="font-size:1em">u</text><text text-anchor="middle" x="552" y="100" fill="currentcolor" style="font-size:1em">N</text><text text-anchor="middle" x="560" y="4" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="560" y="52" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="560" y="100" fill="currentcolor" style="font-size:1em">o</text><text text-anchor="middle" x="560" y="148" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="568" y="4" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="568" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="568" y="100" fill="currentcolor" style="font-size:1em">d</text><text text-anchor="middle" x="568" y="148" fill="currentcolor" style="font-size:1em">c</text><text text-anchor="middle" x="576" y="4" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="576" y="52" fill="currentcolor" style="font-size:1em">r</text><text text-anchor="middle" x="576" y="100" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="576" y="148" fill="currentcolor" style="font-size:1em">-</text><text text-anchor="middle" x="584" y="4" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="584" y="148" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="592" y="4" fill="currentcolor" style="font-size:1em">h</text><text text-anchor="middle" x="592" y="52" fill="currentcolor" style="font-size:1em">(</text><text text-anchor="middle" x="592" y="100" fill="currentcolor" style="font-size:1em">m</text><text text-anchor="middle" x="592" y="148" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="600" y="4" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="600" y="52" fill="currentcolor" style="font-size:1em">C</text><text text-anchor="middle" x="600" y="100" fill="currentcolor" style="font-size:1em">a</text><text text-anchor="middle" x="600" y="148" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="608" y="52" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="608" y="100" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="608" y="148" fill="currentcolor" style="font-size:1em">h</text><text text-anchor="middle" x="616" y="4" fill="currentcolor" style="font-size:1em">H</text><text text-anchor="middle" x="616" y="52" fill="currentcolor" style="font-size:1em">o</text><text text-anchor="middle" x="616" y="100" fill="currentcolor" style="font-size:1em">a</text><text text-anchor="middle" x="616" y="148" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="624" y="4" fill="currentcolor" style="font-size:1em">o</text><text text-anchor="middle" x="624" y="52" fill="currentcolor" style="font-size:1em">s</text><text text-anchor="middle" x="624" y="100" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="624" y="148" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="632" y="4" fill="currentcolor" style="font-size:1em">s</text><text text-anchor="middle" x="632" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="632" y="100" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="632" y="148" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="640" y="4" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="640" y="52" fill="currentcolor" style="font-size:1em">d</text><text text-anchor="middle" x="640" y="100" fill="currentcolor" style="font-size:1em">m</text><text text-anchor="middle" x="640" y="148" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="648" y="4" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="648" y="100" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="648" y="148" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="656" y="4" fill="currentcolor" style="font-size:1em">d</text><text text-anchor="middle" x="656" y="52" fill="currentcolor" style="font-size:1em">S</text><text text-anchor="middle" x="656" y="100" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="656" y="148" fill="currentcolor" style="font-size:1em">+</text><text text-anchor="middle" x="664" y="4" fill="currentcolor" style="font-size:1em">)</text><text text-anchor="middle" x="664" y="52" fill="currentcolor" style="font-size:1em">o</text><text text-anchor="middle" x="664" y="100" fill="currentcolor" style="font-size:1em">t</text><text text-anchor="middle" x="664" y="148" fill="currentcolor" style="font-size:1em">p</text><text text-anchor="middle" x="672" y="52" fill="currentcolor" style="font-size:1em">u</text><text text-anchor="middle" x="672" y="100" fill="currentcolor" style="font-size:1em">)</text><text text-anchor="middle" x="672" y="148" fill="currentcolor" style="font-size:1em">l</text><text text-anchor="middle" x="680" y="52" fill="currentcolor" style="font-size:1em">r</text><text text-anchor="middle" x="680" y="148" fill="currentcolor" style="font-size:1em">u</text><text text-anchor="middle" x="688" y="52" fill="currentcolor" style="font-size:1em">c</text><text text-anchor="middle" x="688" y="148" fill="currentcolor" style="font-size:1em">g</text><text text-anchor="middle" x="696" y="52" fill="currentcolor" style="font-size:1em">e</text><text text-anchor="middle" x="696" y="148" fill="currentcolor" style="font-size:1em">i</text><text text-anchor="middle" x="704" y="52" fill="currentcolor" style="font-size:1em">)</text><text text-anchor="middle" x="704" y="148" fill="currentcolor" style="font-size:1em">n</text><text text-anchor="middle" x="712" y="148" fill="currentcolor" style="font-size:1em">)</text></g></svg></div><hr><h2 id=ノード登録とスケジューリングフロー>ノード登録とスケジューリングフロー<a hidden class=anchor aria-hidden=true href=#ノード登録とスケジューリングフロー>#</a></h2><h3 id=チャレンジ発行-getchallenge>チャレンジ発行 (GetChallenge)<a hidden class=anchor aria-hidden=true href=#チャレンジ発行-getchallenge>#</a></h3><ul><li>scope (REGISTER or RECOVER) と node_id を渡し、サーバ側で challenge (署名対象) を生成</li><li>ChallengeResponse に一度きり有効な challenge が含まれ、後続の Register / Recover で署名送信に用いる</li></ul><h3 id=register--recover>Register / Recover<a hidden class=anchor aria-hidden=true href=#register--recover>#</a></h3><ul><li>クライアントは challenge を秘密鍵で署名し、node_id, network, CSR などを付与して送信</li><li>サーバは署名検証によってノード所有権を確認し、mTLS 証明書 (device_cert, device_key) を発行</li><li>Register 時は初回発行、Recover 時は既存ノードの証明書再発行</li><li>以降の操作は node_id ごとに厳密にアクセスを制限し、mTLS 認証により特定のクライアントだけが操作できる</li></ul><h3 id=schedule--getnodeinfo>Schedule / GetNodeInfo<a hidden class=anchor aria-hidden=true href=#schedule--getnodeinfo>#</a></h3><ul><li>Schedule でノード起動を要求すると、Greenlight インフラ上に c-lightning (CLN) が割り当てられ、grpc_uri 等の接続情報が返る</li><li>既に起動済みであれば GetNodeInfo から接続情報を取得可能 (wait=true で割り当て完了を待機するシナリオもある)</li></ul><h3 id=接続操作>接続・操作<a hidden class=anchor aria-hidden=true href=#接続操作>#</a></h3><ul><li>mTLS 認証情報 (device_cert, device_key) により node.proto や greenlight.proto 内の RPC (支払い・チャネル操作等) にアクセスできる</li><li>署名操作が必要な場面 (例: チャネルオープン時のトランザクション署名など) では、SignerEngine (HSMRequest) を通じて秘密鍵署名を行う</li></ul><hr><h2 id=signer-フロー-hsmrequest--hsmservice>Signer フロー (HSMRequest / HsmService)<a hidden class=anchor aria-hidden=true href=#signer-フロー-hsmrequest--hsmservice>#</a></h2><p><code>greenlight.proto</code> に定義される Node サービスには、HSM 関連の RPC が含まれている。以下のようなシナリオで署名リクエストをやり取りする:</p><ol><li>ノード (CLN) 側が秘密鍵操作を要求<ul><li>StreamHsmRequests によって署名リクエスト (HsmRequest) が通知される</li></ul></li><li>Signer が応答生成<ul><li>ローカルデバイスの鍵管理アプリなどが HsmRequest を受け取り、秘密鍵署名や承認処理を実施</li></ul></li><li>Node へ署名結果を返却<ul><li>HsmResponse に署名済みバイト列 (raw) を格納し、RespondHsmRequest などから返却</li></ul></li><li>CLN は署名付きトランザクション等を用い、実際の処理を進める</li></ol><p><code>greenlight.proto</code> の主な要素:</p><ul><li>HsmRequest<ul><li>request_id: リクエストごとの識別子</li><li>raw: 実際の署名対象となるバイト列</li><li>signer_state: 鍵やポリシーなどサイナー側で保持する状態や認可情報</li></ul></li><li>HsmResponse<ul><li>raw: 署名済みバイト列</li><li>error: 不正リクエスト時のエラーメッセージ</li></ul></li></ul><hr><h2 id=cln-との連携>CLN との連携<a hidden class=anchor aria-hidden=true href=#cln-との連携>#</a></h2><p>Scheduler.Service によってノード起動が要求されると、Greenlight インフラは内部で次の手順を踏む:</p><ol><li>Scheduler がスケジューリング要求を受理</li><li>対応する c-lightning (CLN) インスタンスを確保し、ノード ID とネットワーク情報を紐づけ</li><li>起動または操作の過程で署名が必要な場合、CLN は Node サービスの StreamHsmRequests (HSMRequest) で外部サイナーへ署名リクエストを送る</li><li>サイナーが HsmResponse で署名を返す</li><li>CLN は署名付トランザクションを取得し、実際のチャネル操作などを実行</li></ol><hr><h2 id=シーケンス図-mermaid>シーケンス図 (Mermaid)<a hidden class=anchor aria-hidden=true href=#シーケンス図-mermaid>#</a></h2><pre class=mermaid>sequenceDiagram
+    participant Client as Client
+    participant Scheduler as Scheduler
+    participant Node as Node (CLN)
+    participant Signer as Signer/HSM
+
+    Client-&gt;&gt;Scheduler: GetChallenge(scope=REGISTER, node_id)
+    Scheduler--&gt;&gt;Client: ChallengeResponse(challenge)
+
+    Client-&gt;&gt;Scheduler: Register(署名付きchallenge, CSR...)
+    Scheduler--&gt;&gt;Client: RegistrationResponse(device_cert, device_key)
+
+    note over Client,Scheduler: 認証情報を取得後、&lt;br&gt;node_id単位で操作可能
+
+    Client-&gt;&gt;Scheduler: Schedule(node_id)
+    Scheduler--&gt;&gt;Node: CLNインスタンス起動
+    Scheduler--&gt;&gt;Client: NodeInfoResponse(grpc_uri)
+
+    note over Scheduler,Node: ノードを起動済みならGetNodeInfoで取得
+
+    Client-&gt;&gt;Node: (mTLS認証) PayRequest, FundChannel 等
+    Node--&gt;&gt;Signer: HsmRequest(署名要求)
+    Signer--&gt;&gt;Node: HsmResponse(署名済みraw)
+
+    note over Node: 署名済みTXをCLNが送信し、&lt;br&gt;ネットワークで処理を実行
+
+    Node--&gt;&gt;Client: 操作結果
+  </pre><hr><h2 id=mtls-と-hsm-の詳細>mTLS と HSM の詳細<a hidden class=anchor aria-hidden=true href=#mtls-と-hsm-の詳細>#</a></h2><h3 id=mtls-の目的と構造>mTLS の目的と構造<a hidden class=anchor aria-hidden=true href=#mtls-の目的と構造>#</a></h3><ul><li>通常のTLS とは異なり、サーバーとクライアントの双方が証明書を提示する双方向認証を実施</li><li>Greenlight では匿名用の“NOBODY”証明書から開始し、Register/Recover 成功後にノード専用のデバイス証明書を発行する</li><li>クライアントがノード秘密鍵を正当に所有していることを担保し、他ノードへの不正アクセスを防ぐ仕組み</li></ul><h4 id=mtls-シーケンス例-nobody--node特化証明書>mTLS シーケンス例 (Nobody → node特化証明書)<a hidden class=anchor aria-hidden=true href=#mtls-シーケンス例-nobody--node特化証明書>#</a></h4><pre class=mermaid>sequenceDiagram
+    participant Client(Nobody) as Client (TLS:Nobody)
+    participant Scheduler as Scheduler Service
+    participant Signer as Local Signer
+
+    Client(Nobody)-&gt;&gt;Scheduler: GetChallenge(scope=REGISTER, node_id)
+    Scheduler--&gt;&gt;Client(Nobody): ChallengeResponse(challenge)
+
+    note over Client(Nobody): 認証不要で呼べるのは&lt;br&gt;Register/Recover関連のみ
+
+    Client(Nobody)-&gt;&gt;Signer: challenge署名を依頼
+    Signer--&gt;&gt;Client(Nobody): 署名付きchallenge
+
+    Client(Nobody)-&gt;&gt;Scheduler: Register(署名付きchallenge, CSR)
+    Scheduler--&gt;&gt;Client(Nobody): device_cert, device_key
+
+    note over Client(Nobody): node専用 cert/keyを取得し&lt;br&gt;TlsConfig.identity()でアップグレード
+  </pre><h3 id=hsm-signer-の必要性>HSM (Signer) の必要性<a hidden class=anchor aria-hidden=true href=#hsm-signer-の必要性>#</a></h3><ul><li>on-chain 送金やチャネル開閉には秘密鍵署名が必須</li><li>セキュリティ上、秘密鍵を CLN 本体に渡さず、HSM (外部サイナー) が署名だけを担当</li><li>Greenlight の Signer 実装では、Scheduler 経由のチャレンジや起動時の認可ルールを踏まえ、秘密鍵を保持するサイナーが安全に署名を行う</li></ul><h4 id=hsm-サインフロー-clnsigner>HSM サインフロー: CLN→Signer<a hidden class=anchor aria-hidden=true href=#hsm-サインフロー-clnsigner>#</a></h4><pre class=mermaid>sequenceDiagram
+    participant Node(CLN) as Node (CLN)
+    participant Signer as Local Signer(HSM)
+    participant TLS as TlsConfig
+
+    Node(CLN)-&gt;&gt;Signer: HsmRequest(署名対象raw)
+    Signer-&gt;&gt;Signer: 内部ポリシーで確認し、秘密鍵で署名
+    Signer--&gt;&gt;Node(CLN): HsmResponse(署名済みraw)
+    note over Node(CLN): 得られた署名でTXを作成し、&lt;br&gt;ネットワーク送信
+  </pre><h3 id=greenlightlibs-gl-client-のソース連携>greenlight/libs-gl-client のソース連携<a hidden class=anchor aria-hidden=true href=#greenlightlibs-gl-client-のソース連携>#</a></h3><ul><li>[tls.rs]<ul><li>CA, nobody証明書, device_cert などをロードして ClientTlsConfig を生成</li><li>identity() メソッドで anonymous からノード固有証明書に切り替える</li></ul></li><li>[scheduler.rs]<ul><li>Register() や Recover() を介して Scheduler.GetChallenge → 署名応答 → TLS証明書の発行という流れを実装</li><li>ノード専用 TLS 証明書を受け取ったら TlsConfig.identity() で差し替える</li></ul></li></ul><hr><h2 id=pairing-の詳細>Pairing の詳細<a hidden class=anchor aria-hidden=true href=#pairing-の詳細>#</a></h2><h3 id=pairingサービス-schedulerproto>Pairingサービス (scheduler.proto)<a hidden class=anchor aria-hidden=true href=#pairingサービス-schedulerproto>#</a></h3><p>pairing.proto (scheduler.proto 末尾) には次のメソッドが定義されている:</p><ol><li>PairDevice(PairDeviceRequest) returns (PairDeviceResponse)<ul><li>新規デバイスが device_id, CSR, デバイス名, restrictions などをサーバに送り、ペアリングセッションを作成</li><li>サーバは一時的セッションを識別し、新規デバイスへのノードアクセス手続を下準備</li></ul></li><li>GetPairingData(GetPairingDataRequest) returns (GetPairingDataResponse)<ul><li>既存デバイス (すでにノード署名権限を持つ) がセッション情報を取得し、新規デバイスを承認するか判断するためのデータを入手</li></ul></li><li>ApprovePairing(ApprovePairingRequest) returns (greenlight.Empty)<ul><li>既存デバイスが最終承認し、サーバは新規デバイス向けに TLS 証明書などを最終発行</li><li>Rune (制限情報) を付与し、SignerRequestsStream がポリシーチェックや署名承認を実行する場合もある</li></ul></li></ol><h3 id=主要メッセージ-proto-概要>主要メッセージ (proto) 概要<a hidden class=anchor aria-hidden=true href=#主要メッセージ-proto-概要>#</a></h3><ul><li>PairDeviceRequest:<ul><li>string device_id: 新規デバイスのパブリックキー</li><li>bytes csr: CSR (証明書署名要求)</li><li>string device_name: TLS証明書の CN 名の一部</li><li>string description: 人手確認用メッセージ</li><li>string restrictions: Rune など制約情報</li></ul></li><li>PairDeviceResponse:<ul><li>device_cert, device_key, rune, creds などを返却し、新規デバイスがノードへアクセス可能になる</li></ul></li><li>ApprovePairingRequest:<ul><li>string device_id: 新規デバイスのID</li><li>uint64 timestamp: 承認時刻</li><li>string device_name, string restrictions</li><li>bytes sig: 既存デバイス (サイナー) による承認署名</li><li>string rune: 承認に用いるRune</li></ul></li></ul><h3 id=シーケンス図-mermaid---pairingフロー>シーケンス図 (Mermaid) - Pairingフロー<a hidden class=anchor aria-hidden=true href=#シーケンス図-mermaid---pairingフロー>#</a></h3><pre class=mermaid>sequenceDiagram
+    participant NewDevice as New Device
+    participant OldDevice as Old Device (signer)
+    participant Scheduler as Scheduler
+    participant SignerRequests as SignerRequestsStream
+
+    NewDevice-&gt;&gt;Scheduler: PairDevice(PairDeviceRequest)
+    note over NewDevice,Scheduler: 新規デバイスがペアリング用セッションを作成
+
+    OldDevice-&gt;&gt;Scheduler: GetPairingData(GetPairingDataRequest)
+    Scheduler--&gt;&gt;OldDevice: GetPairingDataResponse(device_id, description, restrictions, ...)
+
+    note over OldDevice: 実際にユーザが確認し、承認を判断
+
+    OldDevice-&gt;&gt;Scheduler: ApprovePairing(ApprovePairingRequest)
+    note over Scheduler: 承認内容を&lt;br&gt;SignerRequestsStreamへ通知
+
+    Scheduler--&gt;&gt;SignerRequests: SignerRequest(ApprovePairingRequest)
+    SignerRequests--&gt;&gt;Scheduler: SignerResponse(承認成功または拒否)
+
+    note over Scheduler: 承認完了後に&lt;br&gt;新規デバイスへTLS証明書を発行
+
+    Scheduler--&gt;&gt;NewDevice: PairDeviceResponse(device_cert, device_key, rune, creds)
+
+    note over NewDevice: ノード操作権限を&lt;br&gt;新規デバイスで取得
+  </pre><h3 id=流れのポイント>流れのポイント<a hidden class=anchor aria-hidden=true href=#流れのポイント>#</a></h3><ul><li>新規デバイスは PairDevice で CSR をアップロードし、サーバ側でセッションを確保</li><li>既存デバイスが GetPairingData で情報を取り、ApprovePairing で最終承認</li><li>サイナー (既存デバイスの署名モジュール) が SignerRequestsStream で承認処理を行い、新規デバイスへ TLS cert/key と rune を発行</li><li>新規デバイスはノードと同等 (または制限付き) の操作を取得し、秘密鍵を共有することなく権限移譲を実現する</li></ul></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://yusukeshimizu.github.io/blog/>blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script></body></html>
