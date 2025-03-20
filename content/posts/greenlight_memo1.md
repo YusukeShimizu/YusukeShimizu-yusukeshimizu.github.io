@@ -8,7 +8,7 @@ title: 'Greenlight SchedulerとSignerの関係性'
 greenlightは、どこがself hostで、どこがtrust pointなのか把握しづらい。  
 この記事では、SchedulerとSigner、clnの関係性を整理し、それぞれの役割を明確にする。  
 簡単に言うと、Schedulerはclosed sourceであり、それ以外は公開されている。  
-自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、公開されていると思われる。
+自身でclnのsignerのpluginを稼働させることはないが、おそらく、検証プロセスの透明化のため、また、test serverの起動のため公開されていると思われる。
 
 ```goat
 (Self-Hosted)                                                    (Greenlight Hosted)
@@ -22,12 +22,6 @@ greenlightは、どこがself hostで、どこがtrust pointなのか把握し�
                                      |                           +------------------------+
                                      |----------------------->   |CLN (c-lightning+plugin)|
                                                                  +-----------+------------+
-                                                                              
-Arrows / Messages:
-• UserClient+Signer --> Scheduler  : Manage API call  
-• Scheduler --> CLN                : Node management  
-• CLN --> Scheduler                : Node state notification  
-• CLN --> UserClient+Signer        : HSM signing request (returns to local HSM)  
 ```
 
 ---
