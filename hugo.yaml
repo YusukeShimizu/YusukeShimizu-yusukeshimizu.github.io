@@ -5,3 +5,8 @@ theme: PaperMod
 params:
   homeInfoParams:
     Content: note：llmにより多くの部分を生成
+disablePathToLower: true
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
