@@ -1,10 +1,63 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Fri, 21 Mar 2025 16:07:31 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>covenants everything</title><link>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</link><pubDate>Fri, 21 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</guid><description>&lt;p>&lt;a href="https://www.adoptblock.com/covenants-op-cat-op-ctv-english">https://www.adoptblock.com/covenants-op-cat-op-ctv-english&lt;/a> を、日本語に翻訳し、 &lt;a href="https://github.com/souzatharsis/podcastfy">https://github.com/souzatharsis/podcastfy&lt;/a> を用いて音声化したもの。&lt;/p>
-&lt;p>&lt;a href="https://www.openai.fm/">https://www.openai.fm/&lt;/a> で公開されているように、&lt;code>gpt-4o-mini-tts&lt;/code>を使うことで実用に耐える音声品質になった。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Fri, 21 Mar 2025 16:07:31 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>[podcast]covenants-everything</title><link>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</link><pubDate>Fri, 21 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</guid><description>&lt;p>&lt;a href="https://www.adoptblock.com/covenants-op-cat-op-ctv-english">https://www.adoptblock.com/covenants-op-cat-op-ctv-english&lt;/a> をinputとし、podcastfyを用いて作成したもの。
+&lt;code>gpt-4o-mini-tts&lt;/code>を使うことで実用に耐える音声品質になった。&lt;/p>
 &lt;figure >
 &lt;audio controls preload="metadata">
 &lt;source src="https://yusukeshimizu.github.io/blog/covenants.mp3" type="audio/mpeg">
 &lt;/audio>
-&lt;/figure></description></item><item><title>Github Copilot Chat Commit Message Rules</title><link>https://yusukeshimizu.github.io/blog/posts/github-copilot-chat-commit-message-rules/</link><pubDate>Fri, 21 Mar 2025 09:28:58 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/github-copilot-chat-commit-message-rules/</guid><description>&lt;p>コミットメッセージを標準化するには、&lt;code>github.copilot.chat.commitMessageGeneration.instructions&lt;/code>を設定し、Copilot Chatが常に所定のルールに従うよう誘導するのが効果的である。たとえば、以下のように&lt;code>.vscode/settings.json&lt;/code>に記述する。&lt;/p>
+&lt;/figure>
+&lt;hr>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>ビットコインのスケーラビリティ課題とKaspaとの比較&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>ビットコインのSidechainやLightningなどの拡張方法&lt;/li>
+&lt;li>Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>ビットコインScriptとコヴナンツ入門&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>UTXOモデルとスタックベースの簡素な言語設計&lt;/li>
+&lt;li>コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>主なコヴナンツの種類と特徴&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>トランザクションのハッシュ検証型、トランザクション内容検証型など&lt;/li>
+&lt;li>再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>OPコード（オペコード）の拡張&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>過去に無効化されたOP_CAT再導入と、そのメリット・懸念&lt;/li>
+&lt;li>OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案&lt;/li>
+&lt;li>それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス）&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>ライトニングネットワークやEltooとの関係&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>ANYPREVOUT (BIP-118) でチャネル管理をシンプル化&lt;/li>
+&lt;li>Vaultのアイデアなど、資金盗難への対抗策も議論される&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>ビットコイン開発の進め方&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>SegWitやTaprootの導入にも長いテストと合意形成が必要だった&lt;/li>
+&lt;li>大規模変更ほど、実装リスクとコミュニティの議論に時間を要する&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>今後の展望と注意点&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>コヴナンツ導入でDeFi的な活用も見据えられる&lt;/li>
+&lt;li>ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol></description></item><item><title>Github Copilot Chat Commit Message Rules</title><link>https://yusukeshimizu.github.io/blog/posts/github-copilot-chat-commit-message-rules/</link><pubDate>Fri, 21 Mar 2025 09:28:58 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/github-copilot-chat-commit-message-rules/</guid><description>&lt;p>コミットメッセージを標準化するには、&lt;code>github.copilot.chat.commitMessageGeneration.instructions&lt;/code>を設定し、Copilot Chatが常に所定のルールに従うよう誘導するのが効果的である。たとえば、以下のように&lt;code>.vscode/settings.json&lt;/code>に記述する。&lt;/p>
 &lt;p>他にも多様な方法があるが、ボタンをクリックするだけで設定できるため、結局これが使われていることが多いように思われる。&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-jsonc" data-lang="jsonc">&lt;span style="display:flex;">&lt;span>{
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;github.copilot.chat.commitMessageGeneration.instructions&amp;#34;&lt;/span>: [

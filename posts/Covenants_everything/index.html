@@ -1,22 +1,136 @@
-<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>covenants everything | blog</title>
-<meta name=keywords content><meta name=description content="https://www.adoptblock.com/covenants-op-cat-op-ctv-english を、日本語に翻訳し、 https://github.com/souzatharsis/podcastfy を用いて音声化したもの。
-https://www.openai.fm/ で公開されているように、gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>[podcast]covenants-everything | blog</title>
+<meta name=keywords content><meta name=description content="https://www.adoptblock.com/covenants-op-cat-op-ctv-english をinputとし、podcastfyを用いて作成したもの。
+gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。
 
     
         
         
     
     
-"><meta name=author content><link rel=canonical href=https://yusukeshimizu.github.io/blog/posts/Covenants_everything/><link crossorigin=anonymous href=/blog/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF+13Dyqob6ASlTrTye8=" rel="preload stylesheet" as=style><link rel=icon href=https://yusukeshimizu.github.io/blog/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yusukeshimizu.github.io/blog/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yusukeshimizu.github.io/blog/favicon-32x32.png><link rel=apple-touch-icon href=https://yusukeshimizu.github.io/blog/apple-touch-icon.png><link rel=mask-icon href=https://yusukeshimizu.github.io/blog/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://yusukeshimizu.github.io/blog/posts/Covenants_everything/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://yusukeshimizu.github.io/blog/posts/Covenants_everything/"><meta property="og:site_name" content="blog"><meta property="og:title" content="covenants everything"><meta property="og:description" content="https://www.adoptblock.com/covenants-op-cat-op-ctv-english を、日本語に翻訳し、 https://github.com/souzatharsis/podcastfy を用いて音声化したもの。
-https://www.openai.fm/ で公開されているように、gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-03-21T16:07:31+09:00"><meta property="article:modified_time" content="2025-03-21T16:07:31+09:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="covenants everything"><meta name=twitter:description content="https://www.adoptblock.com/covenants-op-cat-op-ctv-english を、日本語に翻訳し、 https://github.com/souzatharsis/podcastfy を用いて音声化したもの。
-https://www.openai.fm/ で公開されているように、gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。
+
+
+
+
+ビットコインのスケーラビリティ課題とKaspaとの比較
+
+ビットコインのSidechainやLightningなどの拡張方法
+Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる
+
+
+
+ビットコインScriptとコヴナンツ入門
+
+UTXOモデルとスタックベースの簡素な言語設計
+コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア
+
+
+
+主なコヴナンツの種類と特徴
+
+トランザクションのハッシュ検証型、トランザクション内容検証型など
+再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある
+
+
+
+OPコード（オペコード）の拡張
+
+過去に無効化されたOP_CAT再導入と、そのメリット・懸念
+OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案
+それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス）
+
+
+
+ライトニングネットワークやEltooとの関係
+
+ANYPREVOUT (BIP-118) でチャネル管理をシンプル化
+Vaultのアイデアなど、資金盗難への対抗策も議論される
+
+
+
+ビットコイン開発の進め方
+
+SegWitやTaprootの導入にも長いテストと合意形成が必要だった
+大規模変更ほど、実装リスクとコミュニティの議論に時間を要する
+
+
+
+今後の展望と注意点
+
+コヴナンツ導入でDeFi的な活用も見据えられる
+ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須
+
+
+"><meta name=author content><link rel=canonical href=https://yusukeshimizu.github.io/blog/posts/Covenants_everything/><link crossorigin=anonymous href=/blog/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF+13Dyqob6ASlTrTye8=" rel="preload stylesheet" as=style><link rel=icon href=https://yusukeshimizu.github.io/blog/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yusukeshimizu.github.io/blog/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yusukeshimizu.github.io/blog/favicon-32x32.png><link rel=apple-touch-icon href=https://yusukeshimizu.github.io/blog/apple-touch-icon.png><link rel=mask-icon href=https://yusukeshimizu.github.io/blog/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://yusukeshimizu.github.io/blog/posts/Covenants_everything/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://yusukeshimizu.github.io/blog/posts/Covenants_everything/"><meta property="og:site_name" content="blog"><meta property="og:title" content="[podcast]covenants-everything"><meta property="og:description" content="https://www.adoptblock.com/covenants-op-cat-op-ctv-english をinputとし、podcastfyを用いて作成したもの。 gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。
+ビットコインのスケーラビリティ課題とKaspaとの比較
+ビットコインのSidechainやLightningなどの拡張方法 Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる ビットコインScriptとコヴナンツ入門
+UTXOモデルとスタックベースの簡素な言語設計 コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア 主なコヴナンツの種類と特徴
+トランザクションのハッシュ検証型、トランザクション内容検証型など 再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある OPコード（オペコード）の拡張
+過去に無効化されたOP_CAT再導入と、そのメリット・懸念 OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案 それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス） ライトニングネットワークやEltooとの関係
+ANYPREVOUT (BIP-118) でチャネル管理をシンプル化 Vaultのアイデアなど、資金盗難への対抗策も議論される ビットコイン開発の進め方
+SegWitやTaprootの導入にも長いテストと合意形成が必要だった 大規模変更ほど、実装リスクとコミュニティの議論に時間を要する 今後の展望と注意点
+コヴナンツ導入でDeFi的な活用も見据えられる ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須 "><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-03-21T16:07:31+09:00"><meta property="article:modified_time" content="2025-03-21T16:07:31+09:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="[podcast]covenants-everything"><meta name=twitter:description content="https://www.adoptblock.com/covenants-op-cat-op-ctv-english をinputとし、podcastfyを用いて作成したもの。
+gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。
 
     
         
         
     
     
-"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yusukeshimizu.github.io/blog/posts/"},{"@type":"ListItem","position":2,"name":"covenants everything","item":"https://yusukeshimizu.github.io/blog/posts/Covenants_everything/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"covenants everything","name":"covenants everything","description":"https://www.adoptblock.com/covenants-op-cat-op-ctv-english を、日本語に翻訳し、 https://github.com/souzatharsis/podcastfy を用いて音声化したもの。\nhttps://www.openai.fm/ で公開されているように、gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。\n","keywords":[],"articleBody":"https://www.adoptblock.com/covenants-op-cat-op-ctv-english を、日本語に翻訳し、 https://github.com/souzatharsis/podcastfy を用いて音声化したもの。\nhttps://www.openai.fm/ で公開されているように、gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。\n","wordCount":"6","inLanguage":"en","datePublished":"2025-03-21T16:07:31+09:00","dateModified":"2025-03-21T16:07:31+09:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://yusukeshimizu.github.io/blog/posts/Covenants_everything/"},"publisher":{"@type":"Organization","name":"blog","logo":{"@type":"ImageObject","url":"https://yusukeshimizu.github.io/blog/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://yusukeshimizu.github.io/blog/ accesskey=h title="blog (Alt + H)">blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme"><svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">covenants everything</h1><div class=post-meta><span title='2025-03-21 16:07:31 +0900 +0900'>March 21, 2025</span></div></header><div class=post-content><p><a href=https://www.adoptblock.com/covenants-op-cat-op-ctv-english>https://www.adoptblock.com/covenants-op-cat-op-ctv-english</a> を、日本語に翻訳し、 <a href=https://github.com/souzatharsis/podcastfy>https://github.com/souzatharsis/podcastfy</a> を用いて音声化したもの。</p><p><a href=https://www.openai.fm/>https://www.openai.fm/</a> で公開されているように、<code>gpt-4o-mini-tts</code>を使うことで実用に耐える音声品質になった。</p><figure><audio controls preload=metadata><source src=/blog/covenants.mp3 type=audio/mpeg></audio></figure></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://yusukeshimizu.github.io/blog/>blog</a></span> ·
+
+
+
+
+ビットコインのスケーラビリティ課題とKaspaとの比較
+
+ビットコインのSidechainやLightningなどの拡張方法
+Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる
+
+
+
+ビットコインScriptとコヴナンツ入門
+
+UTXOモデルとスタックベースの簡素な言語設計
+コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア
+
+
+
+主なコヴナンツの種類と特徴
+
+トランザクションのハッシュ検証型、トランザクション内容検証型など
+再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある
+
+
+
+OPコード（オペコード）の拡張
+
+過去に無効化されたOP_CAT再導入と、そのメリット・懸念
+OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案
+それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス）
+
+
+
+ライトニングネットワークやEltooとの関係
+
+ANYPREVOUT (BIP-118) でチャネル管理をシンプル化
+Vaultのアイデアなど、資金盗難への対抗策も議論される
+
+
+
+ビットコイン開発の進め方
+
+SegWitやTaprootの導入にも長いテストと合意形成が必要だった
+大規模変更ほど、実装リスクとコミュニティの議論に時間を要する
+
+
+
+今後の展望と注意点
+
+コヴナンツ導入でDeFi的な活用も見据えられる
+ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須
+
+
+"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yusukeshimizu.github.io/blog/posts/"},{"@type":"ListItem","position":2,"name":"[podcast]covenants-everything","item":"https://yusukeshimizu.github.io/blog/posts/Covenants_everything/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"[podcast]covenants-everything","name":"[podcast]covenants-everything","description":"https://www.adoptblock.com/covenants-op-cat-op-ctv-english をinputとし、podcastfyを用いて作成したもの。 gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。\nビットコインのスケーラビリティ課題とKaspaとの比較\nビットコインのSidechainやLightningなどの拡張方法 Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる ビットコインScriptとコヴナンツ入門\nUTXOモデルとスタックベースの簡素な言語設計 コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア 主なコヴナンツの種類と特徴\nトランザクションのハッシュ検証型、トランザクション内容検証型など 再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある OPコード（オペコード）の拡張\n過去に無効化されたOP_CAT再導入と、そのメリット・懸念 OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案 それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス） ライトニングネットワークやEltooとの関係\nANYPREVOUT (BIP-118) でチャネル管理をシンプル化 Vaultのアイデアなど、資金盗難への対抗策も議論される ビットコイン開発の進め方\nSegWitやTaprootの導入にも長いテストと合意形成が必要だった 大規模変更ほど、実装リスクとコミュニティの議論に時間を要する 今後の展望と注意点\nコヴナンツ導入でDeFi的な活用も見据えられる ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須 ","keywords":[],"articleBody":"https://www.adoptblock.com/covenants-op-cat-op-ctv-english をinputとし、podcastfyを用いて作成したもの。 gpt-4o-mini-ttsを使うことで実用に耐える音声品質になった。\nビットコインのスケーラビリティ課題とKaspaとの比較\nビットコインのSidechainやLightningなどの拡張方法 Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる ビットコインScriptとコヴナンツ入門\nUTXOモデルとスタックベースの簡素な言語設計 コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア 主なコヴナンツの種類と特徴\nトランザクションのハッシュ検証型、トランザクション内容検証型など 再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある OPコード（オペコード）の拡張\n過去に無効化されたOP_CAT再導入と、そのメリット・懸念 OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案 それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス） ライトニングネットワークやEltooとの関係\nANYPREVOUT (BIP-118) でチャネル管理をシンプル化 Vaultのアイデアなど、資金盗難への対抗策も議論される ビットコイン開発の進め方\nSegWitやTaprootの導入にも長いテストと合意形成が必要だった 大規模変更ほど、実装リスクとコミュニティの議論に時間を要する 今後の展望と注意点\nコヴナンツ導入でDeFi的な活用も見据えられる ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須 ","wordCount":"29","inLanguage":"en","datePublished":"2025-03-21T16:07:31+09:00","dateModified":"2025-03-21T16:07:31+09:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://yusukeshimizu.github.io/blog/posts/Covenants_everything/"},"publisher":{"@type":"Organization","name":"blog","logo":{"@type":"ImageObject","url":"https://yusukeshimizu.github.io/blog/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://yusukeshimizu.github.io/blog/ accesskey=h title="blog (Alt + H)">blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme"><svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">[podcast]covenants-everything</h1><div class=post-meta><span title='2025-03-21 16:07:31 +0900 +0900'>March 21, 2025</span></div></header><div class=post-content><p><a href=https://www.adoptblock.com/covenants-op-cat-op-ctv-english>https://www.adoptblock.com/covenants-op-cat-op-ctv-english</a> をinputとし、podcastfyを用いて作成したもの。
+<code>gpt-4o-mini-tts</code>を使うことで実用に耐える音声品質になった。</p><figure><audio controls preload=metadata><source src=/blog/covenants.mp3 type=audio/mpeg></audio></figure><hr><ol><li><p><strong>ビットコインのスケーラビリティ課題とKaspaとの比較</strong></p><ul><li>ビットコインのSidechainやLightningなどの拡張方法</li><li>Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる</li></ul></li><li><p><strong>ビットコインScriptとコヴナンツ入門</strong></p><ul><li>UTXOモデルとスタックベースの簡素な言語設計</li><li>コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア</li></ul></li><li><p><strong>主なコヴナンツの種類と特徴</strong></p><ul><li>トランザクションのハッシュ検証型、トランザクション内容検証型など</li><li>再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある</li></ul></li><li><p><strong>OPコード（オペコード）の拡張</strong></p><ul><li>過去に無効化されたOP_CAT再導入と、そのメリット・懸念</li><li>OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案</li><li>それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス）</li></ul></li><li><p><strong>ライトニングネットワークやEltooとの関係</strong></p><ul><li>ANYPREVOUT (BIP-118) でチャネル管理をシンプル化</li><li>Vaultのアイデアなど、資金盗難への対抗策も議論される</li></ul></li><li><p><strong>ビットコイン開発の進め方</strong></p><ul><li>SegWitやTaprootの導入にも長いテストと合意形成が必要だった</li><li>大規模変更ほど、実装リスクとコミュニティの議論に時間を要する</li></ul></li><li><p><strong>今後の展望と注意点</strong></p><ul><li>コヴナンツ導入でDeFi的な活用も見据えられる</li><li>ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須</li></ul></li></ol></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://yusukeshimizu.github.io/blog/>blog</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
         <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
