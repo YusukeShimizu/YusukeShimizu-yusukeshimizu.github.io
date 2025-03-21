@@ -7,8 +7,6 @@ title: 'Github Copilot Chat Commit Message Rules'
 
 他にも多様な方法があるが、ボタンをクリックするだけで設定できるため、結局これが使われていることが多いように思われる。
 
-![alt text](image.png)
-
 ```jsonc
 {
   "github.copilot.chat.commitMessageGeneration.instructions": [
