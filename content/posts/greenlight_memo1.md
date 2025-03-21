@@ -1,9 +1,11 @@
 ---
 date: '2025-03-19T11:07:52+09:00'
-title: 'Greenlight SchedulerとSignerの関係性'
+title: 'Greenlight における Scheduler と Signer/HSM のアーキテクチャ'
 ---
 
 [greenlight proto](https://github.com/Blockstream/greenlight/tree/adac70212c70119cc7e7174a742133e14dcdea0a/libs/proto/glclient) をベースにした解説。
+
+greenlightはLightning Network（LN）の運用を簡易化するためのサービスである。しかし、どこが自己ホスト（self host）で、どこに信頼を置く必要があるのかが分かりにくい。SchedulerはLNノードの管理やスケジューリング機能を担うが、これは非公開のコードで動作し、ユーザーはその内部を直接検証できない。一方、Signerはトランザクション署名を行う重要なコンポーネントであり、cln（Core Lightning）はLightning Networkの実装である。これらは公開リポジトリとして誰でも参照できる。
 
 **目的と結論**  
 Greenlight では、Scheduler (Closed Source) が Node 管理の中心にあり、UserClient (with integrated Signer/HSM) が Self-Hosted 環境で秘密鍵を保持する構造をとる。結論として、UserClient 側が鍵操作を制御しつつ、Greenlight 側の Scheduler が Node (CLN) を起動・管理する。これにより、秘密鍵をローカルで保持したまま Node をリモートで稼働させる運用が可能となる。
