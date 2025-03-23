@@ -1,4 +1,33 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Fri, 21 Mar 2025 16:07:31 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>[podcast]covenants-everything</title><link>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</link><pubDate>Fri, 21 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</guid><description>&lt;p>&lt;a href="https://www.adoptblock.com/covenants-op-cat-op-ctv-english">https://www.adoptblock.com/covenants-op-cat-op-ctv-english&lt;/a> をinputとし、podcastfyを用いて作成したもの。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Sat, 22 Mar 2025 08:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>bip-0119</title><link>https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/</link><pubDate>Sat, 22 Mar 2025 08:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/</guid><description>&lt;p>BIP 119の日本語訳です。&lt;/p>
+&lt;hr>
+&lt;p>BIP: 119&lt;br>
+Layer: Consensus (soft fork)&lt;br>
+Title: CHECKTEMPLATEVERIFY&lt;br>
+Author: Jeremy Rubin &lt;a href="mailto:j@rubin.io">j@rubin.io&lt;/a>&lt;br>
+Comments-URI: &lt;a href="https://github.com/bitcoin/bips/wiki/Comments:BIP-0119">https://github.com/bitcoin/bips/wiki/Comments:BIP-0119&lt;/a>&lt;br>
+Status: Draft&lt;br>
+Type: Standards Track&lt;br>
+Created: 2020-01-06&lt;br>
+License: BSD-3-Clause&lt;/p>
+&lt;h2 id="abstract">Abstract&lt;/h2>
+&lt;p>この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。&lt;/p>
+&lt;h2 id="summary">Summary&lt;/h2>
+&lt;p>OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。&lt;/p>
+&lt;p>OP_CHECKTEMPLATEVERIFY は次のような処理を行います：&lt;/p>
+&lt;ul>
+&lt;li>スタック上に少なくとも 1 つの要素がある。ない場合は失敗。&lt;/li>
+&lt;li>スタック上の要素が 32 バイト長である。そうでなければ NOP。&lt;/li>
+&lt;li>現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。&lt;/li>
+&lt;/ul>
+&lt;p>DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。&lt;/p>
+&lt;p>推奨される標準性ルールとしてさらに：&lt;/p>
+&lt;ul>
+&lt;li>32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。&lt;/li>
+&lt;/ul>
+&lt;h2 id="motivation">Motivation&lt;/h2>
+&lt;p>この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。&lt;/p>
+&lt;h2 id="detailed-specification">Detailed Specification&lt;/h2>
+&lt;p>以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。&lt;/p></description></item><item><title>[podcast]Covenants Everything</title><link>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</link><pubDate>Fri, 21 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</guid><description>&lt;p>&lt;a href="https://www.adoptblock.com/covenants-op-cat-op-ctv-english">https://www.adoptblock.com/covenants-op-cat-op-ctv-english&lt;/a> をinputとし、podcastfyを用いて作成したもの。
 &lt;code>gpt-4o-mini-tts&lt;/code>を使うことで実用に耐える音声品質になった。&lt;/p>
 &lt;figure >
 &lt;audio controls preload="metadata">
