@@ -1,10 +1,41 @@
 ---
 date: '2025-03-21T16:07:31+09:00'
-title: 'covenants everything'
+title: '[podcast]Covenants Everything'
 ---
 
-https://www.adoptblock.com/covenants-op-cat-op-ctv-english を、日本語に翻訳し、 https://github.com/souzatharsis/podcastfy を用いて音声化したもの。
-
-https://www.openai.fm/ で公開されているように、`gpt-4o-mini-tts`を使うことで実用に耐える音声品質になった。
+https://www.adoptblock.com/covenants-op-cat-op-ctv-english をinputとし、podcastfyを用いて作成したもの。
+`gpt-4o-mini-tts`を使うことで実用に耐える音声品質になった。
 
 {{<audio src="covenants.mp3" >}}
+
+---
+
+1. **ビットコインのスケーラビリティ課題とKaspaとの比較**  
+   - ビットコインのSidechainやLightningなどの拡張方法  
+   - Kaspaは高速だが、フルノードでない点がセキュリティ上の妥協になる  
+
+2. **ビットコインScriptとコヴナンツ入門**  
+   - UTXOモデルとスタックベースの簡素な言語設計  
+   - コヴナンツ（Covenants）で“UTXOの使い方”を厳しく制限・管理できるアイデア  
+
+3. **主なコヴナンツの種類と特徴**  
+   - トランザクションのハッシュ検証型、トランザクション内容検証型など  
+   - 再帰的に制限をかけることで、予期せぬ流動性の低下やファンジビリティ低下リスクがある  
+
+4. **OPコード（オペコード）の拡張**  
+   - 過去に無効化されたOP_CAT再導入と、そのメリット・懸念  
+   - OP_CHECKTEMPLATEVERIFY (OP_CTV) などのシンプルなコヴナンツ実装案  
+   - それぞれのアプローチのトレードオフ（柔軟性と安全性のバランス）  
+
+5. **ライトニングネットワークやEltooとの関係**  
+   - ANYPREVOUT (BIP-118) でチャネル管理をシンプル化  
+   - Vaultのアイデアなど、資金盗難への対抗策も議論される  
+
+6. **ビットコイン開発の進め方**  
+   - SegWitやTaprootの導入にも長いテストと合意形成が必要だった  
+   - 大規模変更ほど、実装リスクとコミュニティの議論に時間を要する  
+
+7. **今後の展望と注意点**  
+   - コヴナンツ導入でDeFi的な活用も見据えられる  
+   - ただし、BTCのファンジビリティや可用性を損なう恐れもあり、慎重な検証が必須  
+
