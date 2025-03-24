@@ -1,50 +1,61 @@
 <!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>bip-0119 | blog</title>
-<meta name=keywords content><meta name=description content="BIP 119の日本語訳です。
+<meta name=keywords content><meta name=description content="BIP 119の日本語訳をおいておく。
+この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。
+BIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。
+Developer Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace
+なお、この記事は、commit hash88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f 時点のものとなっている。
 
-BIP: 119
-Layer: Consensus (soft fork)
-Title: CHECKTEMPLATEVERIFY
-Author: Jeremy Rubin j@rubin.io
-Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119
-Status: Draft
-Type: Standards Track
-Created: 2020-01-06
-License: BSD-3-Clause
 Abstract
-この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。
 Summary
-OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。
-OP_CHECKTEMPLATEVERIFY は次のような処理を行います：
-
-スタック上に少なくとも 1 つの要素がある。ない場合は失敗。
-スタック上の要素が 32 バイト長である。そうでなければ NOP。
-現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。
-
-DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。
-推奨される標準性ルールとしてさらに：
-
-32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。
-
 Motivation
-この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。
 Detailed Specification
-以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。"><meta name=author content><link rel=canonical href=https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/><link crossorigin=anonymous href=/blog/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF+13Dyqob6ASlTrTye8=" rel="preload stylesheet" as=style><link rel=icon href=https://yusukeshimizu.github.io/blog/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yusukeshimizu.github.io/blog/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yusukeshimizu.github.io/blog/favicon-32x32.png><link rel=apple-touch-icon href=https://yusukeshimizu.github.io/blog/apple-touch-icon.png><link rel=mask-icon href=https://yusukeshimizu.github.io/blog/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/"><meta property="og:site_name" content="blog"><meta property="og:title" content="bip-0119"><meta property="og:description" content="BIP 119の日本語訳です。
-BIP: 119
-Layer: Consensus (soft fork)
-Title: CHECKTEMPLATEVERIFY
-Author: Jeremy Rubin j@rubin.io
-Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119
-Status: Draft
-Type: Standards Track
-Created: 2020-01-06
-License: BSD-3-Clause
-Abstract この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。
-Summary OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。
-OP_CHECKTEMPLATEVERIFY は次のような処理を行います：
-スタック上に少なくとも 1 つの要素がある。ない場合は失敗。 スタック上の要素が 32 バイト長である。そうでなければ NOP。 現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。 DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。
-推奨される標準性ルールとしてさらに：
-32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。 Motivation この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。
-Detailed Specification 以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-03-22T08:56:49+09:00"><meta property="article:modified_time" content="2025-03-22T08:56:49+09:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="bip-0119"><meta name=twitter:description content="BIP 119の日本語訳です。
+デプロイ
+参考実装
+根拠
+
+The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack
+
+Committing to the version and locktime
+Committing to the ScriptSigs Hash
+インプット数へのコミット
+シーケンスハッシュへのコミット
+アウトプット数へのコミット
+アウトプットハッシュへのコミット
+現在のインプットのインデックスへのコミット
+Committing to Values by Hash
+Using SHA256
+Using Non-Tagged Hashes
+The Ordering of Fields
+
+
+設計上のトレードオフとリスク
+
+Denial of Service and Validation Costs
+永久に使用できない出力
+転送アドレス
+NOP-Default and Recommended Standardness Rules
+機能の冗長性
+将来的なアップグレード
+
+CHECKTEMPLATEVERIFY バージョン
+OP_CHECKSIGFROMSTACKVERIFY
+OP_AMOUNTVERIFY
+OP_CAT/OP_SHA256STREAM
+
+
+
+
+
+
+Backwards Compatibility
+スクリプト互換性
+References
+
+類似した代替案について
+
+
+著作権
+
 
 BIP: 119
 Layer: Consensus (soft fork)
@@ -54,26 +65,86 @@ Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119
 Status: Draft
 Type: Standards Track
 Created: 2020-01-06
-License: BSD-3-Clause
+License: BSD-3-Clause"><meta name=author content><link rel=canonical href=https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/><link crossorigin=anonymous href=/blog/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF+13Dyqob6ASlTrTye8=" rel="preload stylesheet" as=style><link rel=icon href=https://yusukeshimizu.github.io/blog/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://yusukeshimizu.github.io/blog/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://yusukeshimizu.github.io/blog/favicon-32x32.png><link rel=apple-touch-icon href=https://yusukeshimizu.github.io/blog/apple-touch-icon.png><link rel=mask-icon href=https://yusukeshimizu.github.io/blog/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/"><meta property="og:site_name" content="blog"><meta property="og:title" content="bip-0119"><meta property="og:description" content="BIP 119の日本語訳をおいておく。
+この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。
+BIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。
+Developer Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace
+なお、この記事は、commit hash88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f 時点のものとなっている。
+Abstract Summary Motivation Detailed Specification デプロイ 参考実装 根拠 The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack Committing to the version and locktime Committing to the ScriptSigs Hash インプット数へのコミット シーケンスハッシュへのコミット アウトプット数へのコミット アウトプットハッシュへのコミット 現在のインプットのインデックスへのコミット Committing to Values by Hash Using SHA256 Using Non-Tagged Hashes The Ordering of Fields 設計上のトレードオフとリスク Denial of Service and Validation Costs 永久に使用できない出力 転送アドレス NOP-Default and Recommended Standardness Rules 機能の冗長性 将来的なアップグレード CHECKTEMPLATEVERIFY バージョン OP_CHECKSIGFROMSTACKVERIFY OP_AMOUNTVERIFY OP_CAT/OP_SHA256STREAM Backwards Compatibility スクリプト互換性 References 類似した代替案について 著作権 BIP: 119
+Layer: Consensus (soft fork)
+Title: CHECKTEMPLATEVERIFY
+Author: Jeremy Rubin j@rubin.io
+Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119
+Status: Draft
+Type: Standards Track
+Created: 2020-01-06
+License: BSD-3-Clause"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-03-22T08:56:49+09:00"><meta property="article:modified_time" content="2025-03-22T08:56:49+09:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="bip-0119"><meta name=twitter:description content="BIP 119の日本語訳をおいておく。
+この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。
+BIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。
+Developer Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace
+なお、この記事は、commit hash88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f 時点のものとなっている。
+
 Abstract
-この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。
 Summary
-OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。
-OP_CHECKTEMPLATEVERIFY は次のような処理を行います：
-
-スタック上に少なくとも 1 つの要素がある。ない場合は失敗。
-スタック上の要素が 32 バイト長である。そうでなければ NOP。
-現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。
-
-DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。
-推奨される標準性ルールとしてさらに：
-
-32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。
-
 Motivation
-この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。
 Detailed Specification
-以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yusukeshimizu.github.io/blog/posts/"},{"@type":"ListItem","position":2,"name":"bip-0119","item":"https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"bip-0119","name":"bip-0119","description":"BIP 119の日本語訳です。\nBIP: 119\nLayer: Consensus (soft fork)\nTitle: CHECKTEMPLATEVERIFY\nAuthor: Jeremy Rubin j@rubin.io\nComments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119\nStatus: Draft\nType: Standards Track\nCreated: 2020-01-06\nLicense: BSD-3-Clause\nAbstract この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。\nSummary OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。\nOP_CHECKTEMPLATEVERIFY は次のような処理を行います：\nスタック上に少なくとも 1 つの要素がある。ない場合は失敗。 スタック上の要素が 32 バイト長である。そうでなければ NOP。 現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。 DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。\n推奨される標準性ルールとしてさらに：\n32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。 Motivation この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。\nDetailed Specification 以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。\n","keywords":[],"articleBody":"BIP 119の日本語訳です。\nBIP: 119\nLayer: Consensus (soft fork)\nTitle: CHECKTEMPLATEVERIFY\nAuthor: Jeremy Rubin j@rubin.io\nComments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119\nStatus: Draft\nType: Standards Track\nCreated: 2020-01-06\nLicense: BSD-3-Clause\nAbstract この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。\nSummary OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。\nOP_CHECKTEMPLATEVERIFY は次のような処理を行います：\nスタック上に少なくとも 1 つの要素がある。ない場合は失敗。 スタック上の要素が 32 バイト長である。そうでなければ NOP。 現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。 DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。\n推奨される標準性ルールとしてさらに：\n32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。 Motivation この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。\nDetailed Specification 以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。\nThe execution of the opcode is as follows:\ndef execute_bip_119(self): # Before soft-fork activation / failed activation # continue to treat as NOP4 if not self.flags.script_verify_default_check_template_verify_hash: # Potentially set for node-local policy to discourage premature use if self.flags.script_verify_discourage_upgradable_nops: return self.errors_with(errors.script_err_discourage_upgradable_nops) return self.return_as_nop() # CTV always requires at least one stack argument if len(self.stack) \u003c 1: return self.errors_with(errors.script_err_invalid_stack_operation) # CTV only verifies the hash against a 32 byte argument if len(self.stack[-1]) == 32: # Ensure the precomputed data required for anti-DoS is available, # or cache it on first use if self.context.precomputed_ctv_data == None: self.context.precomputed_ctv_data = self.context.tx.get_default_check_template_precomputed_data() # If the hashes do not match, return error if stack[-1] != self.context.tx.get_default_check_template_hash(self.context.nIn, self.context.precomputed_ctv_data): return self.errors_with(errors.script_err_template_mismatch) return self.return_as_nop() # future upgrade can add semantics for this opcode with different length args # so discourage use when applicable if self.flags.script_verify_discourage_upgradable_nops: return self.errors_with(errors.script_err_discourage_upgradable_nops) else: return self.return_as_nop() このハッシュの計算は、以下に示すように実装できます (ここで self はトランザクション型を指します)。どのような検証コンテキストでも、事前計算されたデータが初期化されていないとサービス妨害攻撃を招く可能性があるため注意が必要です。任意の実装は、二次元的なハッシュ計算による DoS を回避するために、これらのハッシュ計算部分をキャッシュしなければなりません。scriptsig、sequence、アウトプットなど可変長のすべての計算は事前計算を行う必要があります。詳細は「Denial of Service and Validation Costs」を参照してください。これは性能最適化ではありません。\ndef ser_compact_size(l): r = b\"\" if l \u003c 253: # Serialize as unsigned char r = struct.pack(\"B\", l) elif l \u003c 0x10000: # Serialize as unsigned char 253 followed by unsigned 2 byte integer (little endian) r = struct.pack(\"","wordCount":"1567","inLanguage":"en","datePublished":"2025-03-22T08:56:49+09:00","dateModified":"2025-03-22T08:56:49+09:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/"},"publisher":{"@type":"Organization","name":"blog","logo":{"@type":"ImageObject","url":"https://yusukeshimizu.github.io/blog/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://yusukeshimizu.github.io/blog/ accesskey=h title="blog (Alt + H)">blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme"><svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">bip-0119</h1><div class=post-meta><span title='2025-03-22 08:56:49 +0900 +0900'>March 22, 2025</span></div></header><div class=post-content><p>BIP 119の日本語訳です。</p><hr><p>BIP: 119<br>Layer: Consensus (soft fork)<br>Title: CHECKTEMPLATEVERIFY<br>Author: Jeremy Rubin <a href=mailto:j@rubin.io>j@rubin.io</a><br>Comments-URI: <a href=https://github.com/bitcoin/bips/wiki/Comments:BIP-0119>https://github.com/bitcoin/bips/wiki/Comments:BIP-0119</a><br>Status: Draft<br>Type: Standards Track<br>Created: 2020-01-06<br>License: BSD-3-Clause</p><h2 id=abstract>Abstract<a hidden class=anchor aria-hidden=true href=#abstract>#</a></h2><p>この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。</p><h2 id=summary>Summary<a hidden class=anchor aria-hidden=true href=#summary>#</a></h2><p>OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。</p><p>OP_CHECKTEMPLATEVERIFY は次のような処理を行います：</p><ul><li>スタック上に少なくとも 1 つの要素がある。ない場合は失敗。</li><li>スタック上の要素が 32 バイト長である。そうでなければ NOP。</li><li>現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。</li></ul><p>DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。</p><p>推奨される標準性ルールとしてさらに：</p><ul><li>32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。</li></ul><h2 id=motivation>Motivation<a hidden class=anchor aria-hidden=true href=#motivation>#</a></h2><p>この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。</p><h2 id=detailed-specification>Detailed Specification<a hidden class=anchor aria-hidden=true href=#detailed-specification>#</a></h2><p>以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。</p><p>The execution of the opcode is as follows:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>execute_bip_119</span>(self):
+デプロイ
+参考実装
+根拠
+
+The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack
+
+Committing to the version and locktime
+Committing to the ScriptSigs Hash
+インプット数へのコミット
+シーケンスハッシュへのコミット
+アウトプット数へのコミット
+アウトプットハッシュへのコミット
+現在のインプットのインデックスへのコミット
+Committing to Values by Hash
+Using SHA256
+Using Non-Tagged Hashes
+The Ordering of Fields
+
+
+設計上のトレードオフとリスク
+
+Denial of Service and Validation Costs
+永久に使用できない出力
+転送アドレス
+NOP-Default and Recommended Standardness Rules
+機能の冗長性
+将来的なアップグレード
+
+CHECKTEMPLATEVERIFY バージョン
+OP_CHECKSIGFROMSTACKVERIFY
+OP_AMOUNTVERIFY
+OP_CAT/OP_SHA256STREAM
+
+
+
+
+
+
+Backwards Compatibility
+スクリプト互換性
+References
+
+類似した代替案について
+
+
+著作権
+
+
+BIP: 119
+Layer: Consensus (soft fork)
+Title: CHECKTEMPLATEVERIFY
+Author: Jeremy Rubin j@rubin.io
+Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119
+Status: Draft
+Type: Standards Track
+Created: 2020-01-06
+License: BSD-3-Clause"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://yusukeshimizu.github.io/blog/posts/"},{"@type":"ListItem","position":2,"name":"bip-0119","item":"https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"bip-0119","name":"bip-0119","description":"BIP 119の日本語訳をおいておく。\nこの記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。\nBIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。\nDeveloper Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace\nなお、この記事は、commit hash88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f 時点のものとなっている。\nAbstract Summary Motivation Detailed Specification デプロイ 参考実装 根拠 The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack Committing to the version and locktime Committing to the ScriptSigs Hash インプット数へのコミット シーケンスハッシュへのコミット アウトプット数へのコミット アウトプットハッシュへのコミット 現在のインプットのインデックスへのコミット Committing to Values by Hash Using SHA256 Using Non-Tagged Hashes The Ordering of Fields 設計上のトレードオフとリスク Denial of Service and Validation Costs 永久に使用できない出力 転送アドレス NOP-Default and Recommended Standardness Rules 機能の冗長性 将来的なアップグレード CHECKTEMPLATEVERIFY バージョン OP_CHECKSIGFROMSTACKVERIFY OP_AMOUNTVERIFY OP_CAT/OP_SHA256STREAM Backwards Compatibility スクリプト互換性 References 類似した代替案について 著作権 BIP: 119\nLayer: Consensus (soft fork)\nTitle: CHECKTEMPLATEVERIFY\nAuthor: Jeremy Rubin j@rubin.io\nComments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119\nStatus: Draft\nType: Standards Track\nCreated: 2020-01-06\nLicense: BSD-3-Clause\n","keywords":[],"articleBody":"BIP 119の日本語訳をおいておく。\nこの記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。\nBIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。\nDeveloper Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace\nなお、この記事は、commit hash88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f 時点のものとなっている。\nAbstract Summary Motivation Detailed Specification デプロイ 参考実装 根拠 The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack Committing to the version and locktime Committing to the ScriptSigs Hash インプット数へのコミット シーケンスハッシュへのコミット アウトプット数へのコミット アウトプットハッシュへのコミット 現在のインプットのインデックスへのコミット Committing to Values by Hash Using SHA256 Using Non-Tagged Hashes The Ordering of Fields 設計上のトレードオフとリスク Denial of Service and Validation Costs 永久に使用できない出力 転送アドレス NOP-Default and Recommended Standardness Rules 機能の冗長性 将来的なアップグレード CHECKTEMPLATEVERIFY バージョン OP_CHECKSIGFROMSTACKVERIFY OP_AMOUNTVERIFY OP_CAT/OP_SHA256STREAM Backwards Compatibility スクリプト互換性 References 類似した代替案について 著作権 BIP: 119\nLayer: Consensus (soft fork)\nTitle: CHECKTEMPLATEVERIFY\nAuthor: Jeremy Rubin j@rubin.io\nComments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0119\nStatus: Draft\nType: Standards Track\nCreated: 2020-01-06\nLicense: BSD-3-Clause\nAbstract この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。\nSummary OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。\nOP_CHECKTEMPLATEVERIFY は次のような処理を行います：\nスタック上に少なくとも 1 つの要素がある。ない場合は失敗。 スタック上の要素が 32 バイト長である。そうでなければ NOP。 現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。 DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。\n推奨される標準性ルールとしてさらに：\n32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。 Motivation この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。\nDetailed Specification 以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。\nThe execution of the opcode is as follows:\ndef execute_bip_119(self): # Before soft-fork activation / failed activation # continue to treat as NOP4 if not self.flags.script_verify_default_check_template_verify_hash: # Potentially set for node-local policy to discourage premature use if self.flags.script_verify_discourage_upgradable_nops: return self.errors_with(errors.script_err_discourage_upgradable_nops) return self.return_as_nop() # CTV always requires at least one stack argument if len(self.stack) \u003c 1: return self.errors_with(errors.script_err_invalid_stack_operation) # CTV only verifies the hash against a 32 byte argument if len(self.stack[-1]) == 32: # Ensure the precomputed data required for anti-DoS is available, # or cache it on first use if self.context.precomputed_ctv_data == None: self.context.precomputed_ctv_data = self.context.tx.get_default_check_template_precomputed_data() # If the hashes do not match, return error if stack[-1] != self.context.tx.get_default_check_template_hash(self.context.nIn, self.context.precomputed_ctv_data): return self.errors_with(errors.script_err_template_mismatch) return self.return_as_nop() # future upgrade can add semantics for this opcode with different length args # so discourage use when applicable if self.flags.script_verify_discourage_upgradable_nops: return self.errors_with(errors.script_err_discourage_upgradable_nops) else: return self.return_as_nop() このハッシュの計算は、以下に示すように実装できます (ここで self はトランザクション型を指します)。どのような検証コンテキストでも、事前計算されたデータが初期化されていないとサービス妨害攻撃を招く可能性があるため注意が必要です。任意の実装は、二次元的なハッシュ計算による DoS を回避するために、これらのハッシュ計算部分をキャッシュしなければなりません。scriptsig、sequence、アウトプットなど可変長のすべての計算は事前計算を行う必要があります。詳細は「Denial of Service and Validation Costs」を参照してください。これは性能最適化ではありません。\ndef ser_compact_size(l): r = b\"\" if l \u003c 253: # Serialize as unsigned char r = struct.pack(\"B\", l) elif l \u003c 0x10000: # Serialize as unsigned char 253 followed by unsigned 2 byte integer (little endian) r = struct.pack(\"","wordCount":"1668","inLanguage":"en","datePublished":"2025-03-22T08:56:49+09:00","dateModified":"2025-03-22T08:56:49+09:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/"},"publisher":{"@type":"Organization","name":"blog","logo":{"@type":"ImageObject","url":"https://yusukeshimizu.github.io/blog/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://yusukeshimizu.github.io/blog/ accesskey=h title="blog (Alt + H)">blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme"><svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">bip-0119</h1><div class=post-meta><span title='2025-03-22 08:56:49 +0900 +0900'>March 22, 2025</span></div></header><div class=post-content><p>BIP 119の日本語訳をおいておく。</p><p>この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。<br>BIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。<br><a href=https://www.coindesk.com/tech/2025/03/17/developer-consensus-may-be-converging-on-a-bitcoin-soft-fork-proposal-blockspace>Developer Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace</a></p><p>なお、この記事は、commit hash<a href=https://github.com/bitcoin/bips/blob/88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f/bip-0119.mediawiki>88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f</a> 時点のものとなっている。</p><ul><li><a href=#abstract>Abstract</a></li><li><a href=#summary>Summary</a></li><li><a href=#motivation>Motivation</a></li><li><a href=#detailed-specification>Detailed Specification</a></li><li><a href=#%E3%83%87%E3%83%97%E3%83%AD%E3%82%A4>デプロイ</a></li><li><a href=#%E5%8F%82%E8%80%83%E5%AE%9F%E8%A3%85>参考実装</a></li><li><a href=#%E6%A0%B9%E6%8B%A0>根拠</a><ul><li><a href=#the-defaultchecktemplateverifyhash-of-the-transaction-at-the-current-input-index-matches-the-top-of-the-stack>The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack</a><ul><li><a href=#committing-to-the-version-and-locktime>Committing to the version and locktime</a></li><li><a href=#committing-to-the-scriptsigs-hash>Committing to the ScriptSigs Hash</a></li><li><a href=#%E3%82%A4%E3%83%B3%E3%83%97%E3%83%83%E3%83%88%E6%95%B0%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88>インプット数へのコミット</a></li><li><a href=#%E3%82%B7%E3%83%BC%E3%82%B1%E3%83%B3%E3%82%B9%E3%83%8F%E3%83%83%E3%82%B7%E3%83%A5%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88>シーケンスハッシュへのコミット</a></li><li><a href=#%E3%82%A2%E3%82%A6%E3%83%88%E3%83%97%E3%83%83%E3%83%88%E6%95%B0%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88>アウトプット数へのコミット</a></li><li><a href=#%E3%82%A2%E3%82%A6%E3%83%88%E3%83%97%E3%83%83%E3%83%88%E3%83%8F%E3%83%83%E3%82%B7%E3%83%A5%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88>アウトプットハッシュへのコミット</a></li><li><a href=#%E7%8F%BE%E5%9C%A8%E3%81%AE%E3%82%A4%E3%83%B3%E3%83%97%E3%83%83%E3%83%88%E3%81%AE%E3%82%A4%E3%83%B3%E3%83%87%E3%83%83%E3%82%AF%E3%82%B9%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88>現在のインプットのインデックスへのコミット</a></li><li><a href=#committing-to-values-by-hash>Committing to Values by Hash</a></li><li><a href=#using-sha256>Using SHA256</a></li><li><a href=#using-non-tagged-hashes>Using Non-Tagged Hashes</a></li><li><a href=#the-ordering-of-fields>The Ordering of Fields</a></li></ul></li><li><a href=#%E8%A8%AD%E8%A8%88%E4%B8%8A%E3%81%AE%E3%83%88%E3%83%AC%E3%83%BC%E3%83%89%E3%82%AA%E3%83%95%E3%81%A8%E3%83%AA%E3%82%B9%E3%82%AF>設計上のトレードオフとリスク</a><ul><li><a href=#denial-of-service-and-validation-costs>Denial of Service and Validation Costs</a></li><li><a href=#%E6%B0%B8%E4%B9%85%E3%81%AB%E4%BD%BF%E7%94%A8%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84%E5%87%BA%E5%8A%9B>永久に使用できない出力</a></li><li><a href=#%E8%BB%A2%E9%80%81%E3%82%A2%E3%83%89%E3%83%AC%E3%82%B9>転送アドレス</a></li><li><a href=#nop-default-and-recommended-standardness-rules>NOP-Default and Recommended Standardness Rules</a></li><li><a href=#%E6%A9%9F%E8%83%BD%E3%81%AE%E5%86%97%E9%95%B7%E6%80%A7>機能の冗長性</a></li><li><a href=#%E5%B0%86%E6%9D%A5%E7%9A%84%E3%81%AA%E3%82%A2%E3%83%83%E3%83%97%E3%82%B0%E3%83%AC%E3%83%BC%E3%83%89>将来的なアップグレード</a><ul><li><a href=#checktemplateverify-%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3>CHECKTEMPLATEVERIFY バージョン</a></li><li><a href=#op_checksigfromstackverify>OP_CHECKSIGFROMSTACKVERIFY</a></li><li><a href=#op_amountverify>OP_AMOUNTVERIFY</a></li><li><a href=#op_catop_sha256stream>OP_CAT/OP_SHA256STREAM</a></li></ul></li></ul></li></ul></li><li><a href=#backwards-compatibility>Backwards Compatibility</a></li><li><a href=#%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BA%92%E6%8F%9B%E6%80%A7>スクリプト互換性</a></li><li><a href=#references>References</a><ul><li><a href=#%E9%A1%9E%E4%BC%BC%E3%81%97%E3%81%9F%E4%BB%A3%E6%9B%BF%E6%A1%88%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6>類似した代替案について</a></li></ul></li><li><a href=#%E8%91%97%E4%BD%9C%E6%A8%A9>著作権</a></li></ul><hr><p>BIP: 119<br>Layer: Consensus (soft fork)<br>Title: CHECKTEMPLATEVERIFY<br>Author: Jeremy Rubin <a href=mailto:j@rubin.io>j@rubin.io</a><br>Comments-URI: <a href=https://github.com/bitcoin/bips/wiki/Comments:BIP-0119>https://github.com/bitcoin/bips/wiki/Comments:BIP-0119</a><br>Status: Draft<br>Type: Standards Track<br>Created: 2020-01-06<br>License: BSD-3-Clause</p><h2 id=abstract>Abstract<a hidden class=anchor aria-hidden=true href=#abstract>#</a></h2><p>この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。</p><h2 id=summary>Summary<a hidden class=anchor aria-hidden=true href=#summary>#</a></h2><p>OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。</p><p>OP_CHECKTEMPLATEVERIFY は次のような処理を行います：</p><ul><li>スタック上に少なくとも 1 つの要素がある。ない場合は失敗。</li><li>スタック上の要素が 32 バイト長である。そうでなければ NOP。</li><li>現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。</li></ul><p>DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。</p><p>推奨される標準性ルールとしてさらに：</p><ul><li>32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。</li></ul><h2 id=motivation>Motivation<a hidden class=anchor aria-hidden=true href=#motivation>#</a></h2><p>この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。</p><h2 id=detailed-specification>Detailed Specification<a hidden class=anchor aria-hidden=true href=#detailed-specification>#</a></h2><p>以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。</p><p>The execution of the opcode is as follows:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>execute_bip_119</span>(self):
 </span></span><span style=display:flex><span>    <span style=color:#75715e># Before soft-fork activation / failed activation</span>
 </span></span><span style=display:flex><span>    <span style=color:#75715e># continue to treat as NOP4</span>
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#f92672>not</span> self<span style=color:#f92672>.</span>flags<span style=color:#f92672>.</span>script_verify_default_check_template_verify_hash:

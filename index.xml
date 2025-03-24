@@ -1,4 +1,60 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Sat, 22 Mar 2025 08:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>bip-0119</title><link>https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/</link><pubDate>Sat, 22 Mar 2025 08:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/</guid><description>&lt;p>BIP 119の日本語訳です。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Sat, 22 Mar 2025 08:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>bip-0119</title><link>https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/</link><pubDate>Sat, 22 Mar 2025 08:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/bip-0119-ja/</guid><description>&lt;p>BIP 119の日本語訳をおいておく。&lt;/p>
+&lt;p>この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。&lt;br>
+BIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。&lt;br>
+&lt;a href="https://www.coindesk.com/tech/2025/03/17/developer-consensus-may-be-converging-on-a-bitcoin-soft-fork-proposal-blockspace">Developer Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace&lt;/a>&lt;/p>
+&lt;p>なお、この記事は、commit hash&lt;a href="https://github.com/bitcoin/bips/blob/88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f/bip-0119.mediawiki">88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f&lt;/a> 時点のものとなっている。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="#abstract">Abstract&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#summary">Summary&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#motivation">Motivation&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#detailed-specification">Detailed Specification&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%83%87%E3%83%97%E3%83%AD%E3%82%A4">デプロイ&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E5%8F%82%E8%80%83%E5%AE%9F%E8%A3%85">参考実装&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E6%A0%B9%E6%8B%A0">根拠&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#the-defaultchecktemplateverifyhash-of-the-transaction-at-the-current-input-index-matches-the-top-of-the-stack">The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#committing-to-the-version-and-locktime">Committing to the version and locktime&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#committing-to-the-scriptsigs-hash">Committing to the ScriptSigs Hash&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%82%A4%E3%83%B3%E3%83%97%E3%83%83%E3%83%88%E6%95%B0%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88">インプット数へのコミット&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%82%B7%E3%83%BC%E3%82%B1%E3%83%B3%E3%82%B9%E3%83%8F%E3%83%83%E3%82%B7%E3%83%A5%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88">シーケンスハッシュへのコミット&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%82%A2%E3%82%A6%E3%83%88%E3%83%97%E3%83%83%E3%83%88%E6%95%B0%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88">アウトプット数へのコミット&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%82%A2%E3%82%A6%E3%83%88%E3%83%97%E3%83%83%E3%83%88%E3%83%8F%E3%83%83%E3%82%B7%E3%83%A5%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88">アウトプットハッシュへのコミット&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E7%8F%BE%E5%9C%A8%E3%81%AE%E3%82%A4%E3%83%B3%E3%83%97%E3%83%83%E3%83%88%E3%81%AE%E3%82%A4%E3%83%B3%E3%83%87%E3%83%83%E3%82%AF%E3%82%B9%E3%81%B8%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88">現在のインプットのインデックスへのコミット&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#committing-to-values-by-hash">Committing to Values by Hash&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#using-sha256">Using SHA256&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#using-non-tagged-hashes">Using Non-Tagged Hashes&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#the-ordering-of-fields">The Ordering of Fields&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="#%E8%A8%AD%E8%A8%88%E4%B8%8A%E3%81%AE%E3%83%88%E3%83%AC%E3%83%BC%E3%83%89%E3%82%AA%E3%83%95%E3%81%A8%E3%83%AA%E3%82%B9%E3%82%AF">設計上のトレードオフとリスク&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#denial-of-service-and-validation-costs">Denial of Service and Validation Costs&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E6%B0%B8%E4%B9%85%E3%81%AB%E4%BD%BF%E7%94%A8%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84%E5%87%BA%E5%8A%9B">永久に使用できない出力&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E8%BB%A2%E9%80%81%E3%82%A2%E3%83%89%E3%83%AC%E3%82%B9">転送アドレス&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#nop-default-and-recommended-standardness-rules">NOP-Default and Recommended Standardness Rules&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E6%A9%9F%E8%83%BD%E3%81%AE%E5%86%97%E9%95%B7%E6%80%A7">機能の冗長性&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E5%B0%86%E6%9D%A5%E7%9A%84%E3%81%AA%E3%82%A2%E3%83%83%E3%83%97%E3%82%B0%E3%83%AC%E3%83%BC%E3%83%89">将来的なアップグレード&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#checktemplateverify-%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3">CHECKTEMPLATEVERIFY バージョン&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#op_checksigfromstackverify">OP_CHECKSIGFROMSTACKVERIFY&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#op_amountverify">OP_AMOUNTVERIFY&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#op_catop_sha256stream">OP_CAT/OP_SHA256STREAM&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="#backwards-compatibility">Backwards Compatibility&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%83%88%E4%BA%92%E6%8F%9B%E6%80%A7">スクリプト互換性&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#references">References&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="#%E9%A1%9E%E4%BC%BC%E3%81%97%E3%81%9F%E4%BB%A3%E6%9B%BF%E6%A1%88%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">類似した代替案について&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="#%E8%91%97%E4%BD%9C%E6%A8%A9">著作権&lt;/a>&lt;/li>
+&lt;/ul>
 &lt;hr>
 &lt;p>BIP: 119&lt;br>
 Layer: Consensus (soft fork)&lt;br>
@@ -8,26 +64,7 @@ Comments-URI: &lt;a href="https://github.com/bitcoin/bips/wiki/Comments:BIP-0119
 Status: Draft&lt;br>
 Type: Standards Track&lt;br>
 Created: 2020-01-06&lt;br>
-License: BSD-3-Clause&lt;/p>
-&lt;h2 id="abstract">Abstract&lt;/h2>
-&lt;p>この BIP は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、OP_NOP4 のセマンティクスを変更する形で適用されます。&lt;/p>
-&lt;h2 id="summary">Summary&lt;/h2>
-&lt;p>OP_CHECKTEMPLATEVERIFY は、オペコード OP_NOP4 (0xb3) をソフトフォークによるアップグレードとして使用します。&lt;/p>
-&lt;p>OP_CHECKTEMPLATEVERIFY は次のような処理を行います：&lt;/p>
-&lt;ul>
-&lt;li>スタック上に少なくとも 1 つの要素がある。ない場合は失敗。&lt;/li>
-&lt;li>スタック上の要素が 32 バイト長である。そうでなければ NOP。&lt;/li>
-&lt;li>現在の入力インデックスにあるトランザクションの DefaultCheckTemplateVerifyHash がスタック上の要素と等しい。そうでなければ失敗。&lt;/li>
-&lt;/ul>
-&lt;p>DefaultCheckTemplateVerifyHash はシリアライズされたバージョン、locktime、scriptSigs ハッシュ (もし非 null の scriptSigs がある場合)、インプット数、sequences ハッシュ、アウトプット数、アウトプット ハッシュ、そして現在実行中の入力インデックスにコミットします。&lt;/p>
-&lt;p>推奨される標準性ルールとしてさらに：&lt;/p>
-&lt;ul>
-&lt;li>32 バイト以外は SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS として拒否。&lt;/li>
-&lt;/ul>
-&lt;h2 id="motivation">Motivation&lt;/h2>
-&lt;p>この BIP は、トランザクションテンプレートを導入します。これは、ハッシュ化されたトランザクション仕様に対してパターンマッチすることで簡易的な支出制限を実現するものです。OP_CHECKTEMPLATEVERIFY は、アプリケーションで事前署名を使用する際に内在する信頼・対話性・ストレージ要件を大きく削減します。アプリケーションの詳細についてはリファレンスを参照してください。&lt;/p>
-&lt;h2 id="detailed-specification">Detailed Specification&lt;/h2>
-&lt;p>以下のコードは、CHECKTEMPLATEVERIFY を検証するメインロジックを示したもので、Python 風の擬似コードで記述しています。OP_CHECKTEMPLATEVERIFY の仕様としての正準的な定義は、Bitcoin Core の文脈で C++ で実装されたリファレンス実装を参照してください。&lt;/p></description></item><item><title>[podcast]Covenants Everything</title><link>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</link><pubDate>Fri, 21 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</guid><description>&lt;p>&lt;a href="https://www.adoptblock.com/covenants-op-cat-op-ctv-english">https://www.adoptblock.com/covenants-op-cat-op-ctv-english&lt;/a> をinputとし、podcastfyを用いて作成したもの。
+License: BSD-3-Clause&lt;/p></description></item><item><title>[podcast]Covenants Everything</title><link>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</link><pubDate>Fri, 21 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/Covenants_everything/</guid><description>&lt;p>&lt;a href="https://www.adoptblock.com/covenants-op-cat-op-ctv-english">https://www.adoptblock.com/covenants-op-cat-op-ctv-english&lt;/a> をinputとし、podcastfyを用いて作成したもの。
 &lt;code>gpt-4o-mini-tts&lt;/code>を使うことで実用に耐える音声品質になった。&lt;/p>
 &lt;figure >
 &lt;audio controls preload="metadata">
