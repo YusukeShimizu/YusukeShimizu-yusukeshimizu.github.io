@@ -1,4 +1,25 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Mon, 24 Mar 2025 16:07:31 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>[podcast]OP_CTV</title><link>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</link><pubDate>Mon, 24 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</guid><description>&lt;p>&lt;a href="https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/">https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/&lt;/a> をinputとし、podcastfyを用いて作成したもの。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Mon, 24 Mar 2025 16:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳をおいておく。
+ELIPはElements Improvement Proposals, or ELIPs. つまり、Elementsプロジェクトの改善提案書であり、BitcoinのBIPに相当するものである。&lt;/p>
+&lt;p>この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。&lt;br>
+なお、この記事は、commit hash&lt;a href="https://github.com/ElementsProject/ELIPs/tree/9f08b8168328691c1bff6e0261cebbe985f39ae4">9f08b8168328691c1bff6e0261cebbe985f39ae4&lt;/a> 時点のものとなっている。&lt;/p>
+&lt;hr>
+&lt;p>      ELIP: 200&lt;br>
+      Layer: Applications&lt;br>
+      Title: Confidential Transactions の割引料金&lt;br>
+      Author: Byron Hambly &lt;a href="mailto:bhambly@blockstream.com">bhambly@blockstream.com&lt;/a>&lt;br>
+      Comments-Summary: まだコメントはありません。&lt;br>
+      Comments-URI: &lt;a href="https://github.com/ElementsProject/elips/wiki/Comments:ELIP-0200">https://github.com/ElementsProject/elips/wiki/Comments:ELIP-0200&lt;/a>&lt;br>
+      Status: Draft&lt;br>
+      Type: Standards Track&lt;br>
+      Created: 2024-06-19&lt;br>
+      License: BSD-3-Clause&lt;/p>
+&lt;h2 id="はじめに">はじめに&lt;/h2>
+&lt;h3 id="概要">概要&lt;/h3>
+&lt;p>本書は Confidential Transactions の料金を削減する方法を提案いたします。ウォレットが割引料金を算出するために利用できる計算方法および、これらの割引取引をリレーおよび採掘するために必要な Elements ノードの変更点を定めます。&lt;/p>
+&lt;h3 id="copyright">Copyright&lt;/h3>
+&lt;p>本書は 3 条項 BSD ライセンスの下で公開されております。&lt;/p>
+&lt;h3 id="motivation">Motivation&lt;/h3>
+&lt;p>Elements では、 Confidential Transactions ␣( CT )␣は通常の明示的な取引より約 10 倍大きくなっております。出力額は Pedersen コミットメント に置き換えられており、さらに追加の アセット コミットメント と ECDH エフェメラル キー が含まれております。出力にはさらに追加のウィットネスデータが含まれており：金額が有効な範囲内であることを示すレンジプルーフ と、出力のアセットが入力のアセットと一致することを示すサージェクションプルーフ を備えております。&lt;/p></description></item><item><title>[podcast]OP_CTV</title><link>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</link><pubDate>Mon, 24 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</guid><description>&lt;p>&lt;a href="https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/">https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/&lt;/a> をinputとし、podcastfyを用いて作成したもの。&lt;/p>
 &lt;figure >
 &lt;audio controls preload="metadata">
 &lt;source src="https://yusukeshimizu.github.io/blog/OP_CTV.mp3" type="audio/mpeg">
