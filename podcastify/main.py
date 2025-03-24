@@ -18,7 +18,12 @@ custom_config = {
     }
 }
 
+# OPENAI_API_KEY を環境変数から取得
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+os.environ["LANGCHAIN_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
 # api_key_label を指定し、generate_podcastを呼び出す
+# https://urltomarkdown.com/ 
 with open("doc.md", "r", encoding="utf-8") as f:
     doc_md_content = f.read()
 

@@ -14,3 +14,14 @@ osascript -e 'display notification "WiFiが復活しました" with title "通�
 ```
 
 資料を読み込み、作業に没頭し、後で必要部分のみ確認すればよい。緊急の連絡が想定される場合は注意が必要だが、そうでないならオフラインで集中すべきである。この手法によってフロー状態を維持しやすくなり、結果的に作業効率が上がると断言できる。
+
+または、私の実装したcliを使えば、より高度に設定することができる  
+https://github.com/YusukeShimizu/rust-pomo
+
+```sh
+rust-pomo --focus 1200 --break-time 600 --cycles 2
+=== Cycle 1/2: Focus time ===
+Setting WiFi off
+Starting timer for 1200 seconds...
+[####################--------------------] 594s / 1200s                                                                                                 
+```
