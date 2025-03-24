@@ -3,7 +3,50 @@ date: '2025-03-22T08:56:49+09:00'
 title: 'bip-0119'
 ---
 
-BIP 119の日本語訳です。
+BIP 119の日本語訳をおいておく。
+
+この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。  
+BIP 119は、新しいオペコード OP_CHECKTEMPLATEVERIFY を有効化することを提案しており、このブログを書いた段階で、有力な選択肢となっている。  
+[Developer Consensus May Be Converging on a Bitcoin Soft Fork Proposal: Blockspace](https://www.coindesk.com/tech/2025/03/17/developer-consensus-may-be-converging-on-a-bitcoin-soft-fork-proposal-blockspace)
+
+なお、この記事は、commit hash[88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f](https://github.com/bitcoin/bips/blob/88c0fb9b5b7c3ed73386224c8c4ae0fd4fc3537f/bip-0119.mediawiki) 時点のものとなっている。
+
+- [Abstract](#abstract)
+- [Summary](#summary)
+- [Motivation](#motivation)
+- [Detailed Specification](#detailed-specification)
+- [デプロイ](#デプロイ)
+- [参考実装](#参考実装)
+- [根拠](#根拠)
+    - [The DefaultCheckTemplateVerifyHash of the transaction at the current input index matches the top of the stack](#the-defaultchecktemplateverifyhash-of-the-transaction-at-the-current-input-index-matches-the-top-of-the-stack)
+      - [Committing to the version and locktime](#committing-to-the-version-and-locktime)
+      - [Committing to the ScriptSigs Hash](#committing-to-the-scriptsigs-hash)
+      - [インプット数へのコミット](#インプット数へのコミット)
+      - [シーケンスハッシュへのコミット](#シーケンスハッシュへのコミット)
+      - [アウトプット数へのコミット](#アウトプット数へのコミット)
+      - [アウトプットハッシュへのコミット](#アウトプットハッシュへのコミット)
+      - [現在のインプットのインデックスへのコミット](#現在のインプットのインデックスへのコミット)
+      - [Committing to Values by Hash](#committing-to-values-by-hash)
+      - [Using SHA256](#using-sha256)
+      - [Using Non-Tagged Hashes](#using-non-tagged-hashes)
+      - [The Ordering of Fields](#the-ordering-of-fields)
+  - [設計上のトレードオフとリスク](#設計上のトレードオフとリスク)
+    - [Denial of Service and Validation Costs](#denial-of-service-and-validation-costs)
+    - [永久に使用できない出力](#永久に使用できない出力)
+    - [転送アドレス](#転送アドレス)
+    - [NOP-Default and Recommended Standardness Rules](#nop-default-and-recommended-standardness-rules)
+    - [機能の冗長性](#機能の冗長性)
+    - [将来的なアップグレード](#将来的なアップグレード)
+      - [CHECKTEMPLATEVERIFY バージョン](#checktemplateverify-バージョン)
+      - [OP\_CHECKSIGFROMSTACKVERIFY](#op_checksigfromstackverify)
+      - [OP\_AMOUNTVERIFY](#op_amountverify)
+      - [OP\_CAT/OP\_SHA256STREAM](#op_catop_sha256stream)
+- [Backwards Compatibility](#backwards-compatibility)
+- [スクリプト互換性](#スクリプト互換性)
+- [References](#references)
+  - [類似した代替案について](#類似した代替案について)
+- [著作権](#著作権)
+
 
 ---
 
