@@ -1,25 +1,43 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Mon, 24 Mar 2025 16:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳をおいておく。
-ELIPはElements Improvement Proposals, or ELIPs. つまり、Elementsプロジェクトの改善提案書であり、BitcoinのBIPに相当するものである。&lt;/p>
-&lt;p>この記事は、llmにより翻訳されたものであり、内容に誤りがある可能性はある。&lt;br>
-なお、この記事は、commit hash&lt;a href="https://github.com/ElementsProject/ELIPs/tree/9f08b8168328691c1bff6e0261cebbe985f39ae4">9f08b8168328691c1bff6e0261cebbe985f39ae4&lt;/a> 時点のものとなっている。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>blog</title><link>https://yusukeshimizu.github.io/blog/</link><description>Recent content on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Mon, 24 Mar 2025 16:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳。Elements Improvement Proposals (ELIPs) は、BitcoinのBIPに相当するElementsプロジェクトの改善提案である。&lt;/p>
+&lt;p>この記事はllmによる機械翻訳に基づく。誤りの可能性がある点に留意すること。&lt;br>
+この内容はcommit hash&lt;br>
+&lt;a href="https://github.com/ElementsProject/ELIPs/tree/9f08b8168328691c1bff6e0261cebbe985f39ae4">9f08b8168328691c1bff6e0261cebbe985f39ae4&lt;/a>&lt;br>
+時点のリポジトリを参照している。&lt;/p>
 &lt;hr>
-&lt;p>      ELIP: 200&lt;br>
-      Layer: Applications&lt;br>
-      Title: Confidential Transactions の割引料金&lt;br>
-      Author: Byron Hambly &lt;a href="mailto:bhambly@blockstream.com">bhambly@blockstream.com&lt;/a>&lt;br>
-      Comments-Summary: まだコメントはありません。&lt;br>
-      Comments-URI: &lt;a href="https://github.com/ElementsProject/elips/wiki/Comments:ELIP-0200">https://github.com/ElementsProject/elips/wiki/Comments:ELIP-0200&lt;/a>&lt;br>
-      Status: Draft&lt;br>
-      Type: Standards Track&lt;br>
-      Created: 2024-06-19&lt;br>
-      License: BSD-3-Clause&lt;/p>
+&lt;p>ELIP: 200&lt;br>
+Layer: Applications&lt;br>
+Title: Confidential Transactions の割引料金&lt;br>
+Author: Byron Hambly &lt;a href="mailto:bhambly@blockstream.com">bhambly@blockstream.com&lt;/a>&lt;br>
+Comments-Summary: まだコメントはない&lt;br>
+Comments-URI: &lt;a href="https://github.com/ElementsProject/elips/wiki/Comments:ELIP-0200">https://github.com/ElementsProject/elips/wiki/Comments:ELIP-0200&lt;/a>&lt;br>
+Status: Draft&lt;br>
+Type: Standards Track&lt;br>
+Created: 2024-06-19&lt;br>
+License: BSD-3-Clause&lt;/p>
 &lt;h2 id="はじめに">はじめに&lt;/h2>
 &lt;h3 id="概要">概要&lt;/h3>
-&lt;p>本書は Confidential Transactions の料金を削減する方法を提案いたします。ウォレットが割引料金を算出するために利用できる計算方法および、これらの割引取引をリレーおよび採掘するために必要な Elements ノードの変更点を定めます。&lt;/p>
+&lt;p>Confidential Transactions (CT) の取引手数料を割引する方法を提案する。これにより、ウォレットが割引手数料率を算出可能になり、ノードが割引されたCTをリレー・採掘するための要件を定義する。&lt;/p>
 &lt;h3 id="copyright">Copyright&lt;/h3>
-&lt;p>本書は 3 条項 BSD ライセンスの下で公開されております。&lt;/p>
+&lt;p>本書は3条項BSDライセンスの下で公開している。&lt;/p>
 &lt;h3 id="motivation">Motivation&lt;/h3>
-&lt;p>Elements では、 Confidential Transactions ␣( CT )␣は通常の明示的な取引より約 10 倍大きくなっております。出力額は Pedersen コミットメント に置き換えられており、さらに追加の アセット コミットメント と ECDH エフェメラル キー が含まれております。出力にはさらに追加のウィットネスデータが含まれており：金額が有効な範囲内であることを示すレンジプルーフ と、出力のアセットが入力のアセットと一致することを示すサージェクションプルーフ を備えております。&lt;/p></description></item><item><title>[podcast]OP_CTV</title><link>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</link><pubDate>Mon, 24 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</guid><description>&lt;p>&lt;a href="https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/">https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/&lt;/a> をinputとし、podcastfyを用いて作成したもの。&lt;/p>
+&lt;p>ElementsにおけるCTは、明示的な取引よりサイズが約10倍大きい。&lt;br>
+Pedersenコミットメントやアセットコミットメント、ECDHエフェメラルキーなどが追加され、さらにレンジプルーフとサージェクションプルーフを含むウィットネスデータが大きな要因である。&lt;br>
+サイズが大きいほど手数料が高くなるため、ユーザがCTによるプライバシーを犠牲にし、明示的な取引を選びやすくなる可能性がある。&lt;br>
+このELIPは、ElementsでCTを割引料金で受け入れるポリシー変更を提案し、CTと明示的な取引を同等の手数料規模に近づけ、明示的取引優先の動機を下げる。&lt;/p>
+&lt;h2 id="design">Design&lt;/h2>
+&lt;h3 id="overview">Overview&lt;/h3>
+&lt;p>新たに「discount virtual size (discountvsize)」を導入する。&lt;br>
+明示的な取引では通常のvsizeと実質同じ値となるが、CTでは秘密出力が含まれるたびに、各出力分の重みを仮想サイズ計算の前に減少させる。&lt;/p>
+&lt;p>ウォレットは、この割引計算を用いて手数料を推定し、ノードはメンプールへの受け入れやピアへのメッセージングでdiscountvsizeを利用する。これによってCT取引の中継と採掘が行われる。&lt;/p>
+&lt;h3 id="欠点">欠点&lt;/h3>
+&lt;p>ディスカウントを導入すると、実際のコストは表面上の手数料率より低くなる。&lt;br>
+既存のブロックアセンブラは先祖手数料率が高い取引から優先するため、割引CTは同じ「表面料金率」の明示的トランザクションなどより選択が遅れる。&lt;br>
+この状態を解消するには、ブロックアセンブラ側で割引された仮想サイズを基準に手数料率を扱うよう変更が必要だが、最大料金追求よりCTのプライバシー優先を許容するというトレードオフとなる。&lt;/p>
+&lt;h3 id="仕様">仕様&lt;/h3>
+&lt;h4 id="ウォレット">ウォレット&lt;/h4>
+&lt;p>ウォレットは通常の手順で取引を作成し、まずプレースホルダーの手数料出力を含める。&lt;br>
+ダミー署名を埋め込んだ後、BIP-0141&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> に従い以下の式で重みを算出する:&lt;/p>
+&lt;p>Weight = (Base transaction size * 3) + Total transaction size&lt;/p></description></item><item><title>[podcast]OP_CTV</title><link>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</link><pubDate>Mon, 24 Mar 2025 16:07:31 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/podcast-OP_CTV/</guid><description>&lt;p>&lt;a href="https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/">https://d-central.tech/understanding-op_ctv-bip-119-in-bitcoin/&lt;/a> をinputとし、podcastfyを用いて作成したもの。&lt;/p>
 &lt;figure >
 &lt;audio controls preload="metadata">
 &lt;source src="https://yusukeshimizu.github.io/blog/OP_CTV.mp3" type="audio/mpeg">
