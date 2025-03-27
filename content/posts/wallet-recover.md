@@ -34,6 +34,7 @@ BIP0044、BIP0049、BIP0084、BIP0086はいずれもHDウォレットの「目�
 ## BIP49が「legacy segwit」と呼ばれる理由
 
 BIP49のP2WPKH-in-P2SHアドレス（3xxxx）は見た目が通常のP2SHと同じため、一般に「legacy segwit」とも呼ばれる。P2SHの場合、redeemScriptをユーザ側で保持する必要があるが、BIP49対応ウォレット（例: 多くのハードウェアウォレットなど）を使うなら、redeemScriptを個別にバックアップしなくても済む。
+https://github.com/btcsuite/btcwallet/blob/master/waddrmgr/address.go#L554
 
 ## アドレスインデックスとリカバリー
 
@@ -76,6 +77,12 @@ sequenceDiagram
    実際にブロックをスキャンし、高いインデックスのアドレスが見つかったら `ReportFound` で更新し、さらに `horizon` を見直す。  
 4. **最終的に**  
    最も高いインデックス + recoveryWindow + 無効インデックス数まで検査し、使われている可能性のあるアドレスを漏れなく拾う。
+
+### 注意
+このアルゴリズムはbtc walletの実装に基づくものであり、他のウォレット実装には異なる部分があるかもしれない。  
+また、recoveryWindowは、250が設定されている。  
+一般的なユースケースでは考えづらいが、**250以上、indexが連続していない場合は、リカバリーが不完全になる可能性がある。**
+
 
 ---
 
