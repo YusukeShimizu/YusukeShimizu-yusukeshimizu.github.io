@@ -1,4 +1,71 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on blog</title><link>https://yusukeshimizu.github.io/blog/posts/</link><description>Recent content in Posts on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Mon, 24 Mar 2025 16:56:49 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳。Elements Improvement Proposals (ELIPs) は、BitcoinのBIPに相当するElementsプロジェクトの改善提案である。&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on blog</title><link>https://yusukeshimizu.github.io/blog/posts/</link><description>Recent content in Posts on blog</description><generator>Hugo -- 0.145.0</generator><language>en</language><lastBuildDate>Thu, 27 Mar 2025 11:34:54 +0900</lastBuildDate><atom:link href="https://yusukeshimizu.github.io/blog/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Wallet Recover</title><link>https://yusukeshimizu.github.io/blog/posts/wallet-recover/</link><pubDate>Thu, 27 Mar 2025 11:34:54 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/wallet-recover/</guid><description>&lt;p>mnemonic seedを保持していれば、ウォレットの残高をリカバリーできる。これは一見不思議だが、実際には無限に生成可能なアドレス（script pubkey）のうち、使用されたものだけを検出し、UTXOを取得する仕組みがあるためである。どのアドレスが使われたかを追跡できるからこそ、seedを頼りに残高を復元できる。&lt;/p>
+&lt;p>しかし、mnemonic seedを持っているのに残高が正しく復旧しないケースも存在する。また、レガシーSegWit（P2SHアドレス・3xxxx）の潜在的な危険性は誤解を生みやすい。これらを整理するために、btc walletの実装（https://github.com/btcsuite/btcwallet）を例にしながら、BIP0044/49/84/86が規定するHDウォレット構造と、ウォレットのリカバリー方法を示す。&lt;/p>
+&lt;h2 id="bipの概要と相互関係">BIPの概要と相互関係&lt;/h2>
+&lt;p>BIP0044、BIP0049、BIP0084、BIP0086はいずれもHDウォレットの「目的（purpose）番号」を定義し、各アドレス形式を区別している。以下、それぞれの要点をまとめる。&lt;/p>
+&lt;h3 id="bip44">BIP44&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>概要&lt;/strong>: &lt;code>m/44'/coin_type'/account'/change/address_index&lt;/code> の構造を規定する汎用的HDウォレット標準。&lt;/li>
+&lt;li>&lt;strong>用途&lt;/strong>: レガシーP2PKH（1xxxx）アドレスに広く利用されてきた。複数通貨・複数アカウント管理が可能。&lt;/li>
+&lt;li>&lt;strong>他BIPとの関係&lt;/strong>: 新しいアドレス形式に対応するBIP49やBIP84などは、このBIP44をベースにpurpose番号を変えて並立利用できる。&lt;/li>
+&lt;/ul>
+&lt;h3 id="bip49">BIP49&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>概要&lt;/strong>: &lt;code>m/49'/coin_type'/account'/change/address_index&lt;/code> を使い、P2WPKH-in-P2SH（3xxxx）アドレスを定義。&lt;/li>
+&lt;li>&lt;strong>目的&lt;/strong>: 互換性を重視しつつ部分的にSegWitの恩恵（手数料削減など）を得るためのラップドSegWit。&lt;/li>
+&lt;li>&lt;strong>他BIPとの関係&lt;/strong>: レガシー形式（BIP44）を補完し、新しいネイティブSegWit（BIP84）へ移行する中継的役割を果たす。&lt;/li>
+&lt;/ul>
+&lt;h3 id="bip84">BIP84&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>概要&lt;/strong>: &lt;code>m/84'/coin_type'/account'/change/address_index&lt;/code> の構造を使い、ネイティブSegWit（bech32、bc1q&amp;hellip;）アドレスを定義。&lt;/li>
+&lt;li>&lt;strong>目的&lt;/strong>: SegWitの機能をフル活用し、より低い手数料やエラー検知の強化を実現。&lt;/li>
+&lt;li>&lt;strong>他BIPとの関係&lt;/strong>: ラップドSegWit（BIP49）より進んだ純粋なSegWit。Taproot（BIP86）の前段階。&lt;/li>
+&lt;/ul>
+&lt;h3 id="bip86">BIP86&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>概要&lt;/strong>: &lt;code>m/86'/coin_type'/account'/change/address_index&lt;/code> を使い、Taproot（bech32m、bc1p&amp;hellip;）アドレス（単独所有向け）を定義。&lt;/li>
+&lt;li>&lt;strong>目的&lt;/strong>: Schnorr署名やMASTなどTaprootの恩恵（手数料削減・プライバシー向上）を得る。現時点ではシングルキー中心だが、将来的な拡張も想定。&lt;/li>
+&lt;li>&lt;strong>他BIPとの関係&lt;/strong>: ネイティブSegWit（BIP84）より先進的なP2TR形態を扱う。purpose番号86を使い、既存形式と衝突しない。&lt;/li>
+&lt;/ul>
+&lt;h2 id="bip49がlegacy-segwitと呼ばれる理由">BIP49が「legacy segwit」と呼ばれる理由&lt;/h2>
+&lt;p>BIP49のP2WPKH-in-P2SHアドレス（3xxxx）は見た目が通常のP2SHと同じため、一般に「legacy segwit」とも呼ばれる。P2SHの場合、redeemScriptをユーザ側で保持する必要があるが、BIP49対応ウォレット（例: 多くのハードウェアウォレットなど）を使うなら、redeemScriptを個別にバックアップしなくても済む。&lt;/p>
+&lt;h2 id="アドレスインデックスとリカバリー">アドレスインデックスとリカバリー&lt;/h2>
+&lt;p>アドレスインデックス（&lt;code>address_index&lt;/code>）はウォレットが生成したアドレス数に応じて変化する。復旧時には何番目までアドレスを生成してスキャンするかを決める必要がある。btc walletでは以下のアルゴリズムにより、使用中のアドレスを取りこぼさずに効率的なブロックスキャンを行う。&lt;/p>
+&lt;pre class="mermaid">sequenceDiagram
+participant RM as RecoveryManager
+participant RS as RecoveryState
+participant BRS as BranchRecoveryState
+participant BC as Blockchain
+Note over RM: (Resurrectで&amp;lt;br&amp;gt;既存のアドレス・UTXOを復元)
+loop until 全ブロックスキャン完了
+RM-&amp;gt;BC: 次のブロック(群)取得
+BC--&amp;gt;RM: BlockBatch返却
+RM-&amp;gt;RS: State取得
+RM-&amp;gt;&amp;gt;BRS: ExtendHorizon()呼び出し
+alt horizonが不足
+BRS-&amp;gt;&amp;gt;BRS: horizonを拡張&amp;lt;br&amp;gt;(nextUnfound + recoveryWindow)
+note right of BRS: 無効インデックス数も考慮
+end
+RM-&amp;gt;BC: FilterBlocksRequest(生成済みアドレスを照合)
+BC--&amp;gt;RM: FilterBlocksResponse(発見されたaddrのindex)
+RM-&amp;gt;&amp;gt;BRS: ReportFound(index)
+alt 新しい発見がありnextUnfoundが進む
+BRS-&amp;gt;&amp;gt;BRS: horizon再チェック
+end
+end
+Note over RM: 発見された中で最も高いインデックス +&amp;lt;br&amp;gt;recoveryWindow + 無効インデックス数まで生成し続ける
+&lt;/pre>
+&lt;ol>
+&lt;li>&lt;strong>Resurrect&lt;/strong>&lt;br>
+既知のアドレスやUTXOを &lt;code>RecoveryState&lt;/code> に登録し、初期状態をセットする。&lt;/li>
+&lt;li>&lt;strong>ExtendHorizon&lt;/strong>&lt;br>
+&lt;code>nextUnfound + recoveryWindow (+ 無効インデックス数)&lt;/code> までアドレスを導出・監視対象に加えておき、取りこぼしを防ぐ。&lt;/li>
+&lt;li>&lt;strong>FilterBlocks&lt;/strong>&lt;br>
+実際にブロックをスキャンし、高いインデックスのアドレスが見つかったら &lt;code>ReportFound&lt;/code> で更新し、さらに &lt;code>horizon&lt;/code> を見直す。&lt;/li>
+&lt;li>&lt;strong>最終的に&lt;/strong>&lt;br>
+最も高いインデックス + recoveryWindow + 無効インデックス数まで検査し、使われている可能性のあるアドレスを漏れなく拾う。&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;p>mnemonic seedさえあれば複数のアドレス形式（P2PKH、P2WPKH-in-P2SH、P2WPKH、Taprootなど）をまとめて手堅くリカバリーできる。目的番号（purpose）を切り替えながら、ウォレットは無数に生成しうるアドレスのうち実使用されたものを判別して残高を復元する。&lt;/p></description></item><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳。Elements Improvement Proposals (ELIPs) は、BitcoinのBIPに相当するElementsプロジェクトの改善提案である。&lt;/p>
 &lt;p>この記事はllmによる機械翻訳に基づく。誤りの可能性がある点に留意すること。&lt;br>
 この内容はcommit hash&lt;br>
 &lt;a href="https://github.com/ElementsProject/ELIPs/tree/9f08b8168328691c1bff6e0261cebbe985f39ae4">9f08b8168328691c1bff6e0261cebbe985f39ae4&lt;/a>&lt;br>
