@@ -27,7 +27,8 @@
 &lt;li>&lt;strong>他BIPとの関係&lt;/strong>: ネイティブSegWit（BIP84）より先進的なP2TR形態を扱う。purpose番号86を使い、既存形式と衝突しない。&lt;/li>
 &lt;/ul>
 &lt;h2 id="bip49がlegacy-segwitと呼ばれる理由">BIP49が「legacy segwit」と呼ばれる理由&lt;/h2>
-&lt;p>BIP49のP2WPKH-in-P2SHアドレス（3xxxx）は見た目が通常のP2SHと同じため、一般に「legacy segwit」とも呼ばれる。P2SHの場合、redeemScriptをユーザ側で保持する必要があるが、BIP49対応ウォレット（例: 多くのハードウェアウォレットなど）を使うなら、redeemScriptを個別にバックアップしなくても済む。&lt;/p>
+&lt;p>BIP49のP2WPKH-in-P2SHアドレス（3xxxx）は見た目が通常のP2SHと同じため、一般に「legacy segwit」とも呼ばれる。P2SHの場合、redeemScriptをユーザ側で保持する必要があるが、BIP49対応ウォレット（例: 多くのハードウェアウォレットなど）を使うなら、redeemScriptを個別にバックアップしなくても済む。
+&lt;a href="https://github.com/btcsuite/btcwallet/blob/master/waddrmgr/address.go#L554">https://github.com/btcsuite/btcwallet/blob/master/waddrmgr/address.go#L554&lt;/a>&lt;/p>
 &lt;h2 id="アドレスインデックスとリカバリー">アドレスインデックスとリカバリー&lt;/h2>
 &lt;p>アドレスインデックス（&lt;code>address_index&lt;/code>）はウォレットが生成したアドレス数に応じて変化する。復旧時には何番目までアドレスを生成してスキャンするかを決める必要がある。btc walletでは以下のアルゴリズムにより、使用中のアドレスを取りこぼさずに効率的なブロックスキャンを行う。&lt;/p>
 &lt;pre class="mermaid">sequenceDiagram
@@ -64,8 +65,10 @@ Note over RM: 発見された中で最も高いインデックス +&amp;lt;br&am
 &lt;li>&lt;strong>最終的に&lt;/strong>&lt;br>
 最も高いインデックス + recoveryWindow + 無効インデックス数まで検査し、使われている可能性のあるアドレスを漏れなく拾う。&lt;/li>
 &lt;/ol>
-&lt;hr>
-&lt;p>mnemonic seedさえあれば複数のアドレス形式（P2PKH、P2WPKH-in-P2SH、P2WPKH、Taprootなど）をまとめて手堅くリカバリーできる。目的番号（purpose）を切り替えながら、ウォレットは無数に生成しうるアドレスのうち実使用されたものを判別して残高を復元する。&lt;/p></description></item><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳。Elements Improvement Proposals (ELIPs) は、BitcoinのBIPに相当するElementsプロジェクトの改善提案である。&lt;/p>
+&lt;h3 id="注意">注意&lt;/h3>
+&lt;p>このアルゴリズムはbtc walletの実装に基づくものであり、他のウォレット実装には異なる部分があるかもしれない。&lt;br>
+また、recoveryWindowは、250が設定されている。&lt;br>
+一般的なユースケースでは考えづらいが、&lt;strong>250以上、indexが連続していない場合は、リカバリーが不完全になる可能性がある。&lt;/strong>&lt;/p></description></item><item><title>elip-0200</title><link>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</link><pubDate>Mon, 24 Mar 2025 16:56:49 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/elip-0200-ja/</guid><description>&lt;p>ELIP 0200の日本語訳。Elements Improvement Proposals (ELIPs) は、BitcoinのBIPに相当するElementsプロジェクトの改善提案である。&lt;/p>
 &lt;p>この記事はllmによる機械翻訳に基づく。誤りの可能性がある点に留意すること。&lt;br>
 この内容はcommit hash&lt;br>
 &lt;a href="https://github.com/ElementsProject/ELIPs/tree/9f08b8168328691c1bff6e0261cebbe985f39ae4">9f08b8168328691c1bff6e0261cebbe985f39ae4&lt;/a>&lt;br>
