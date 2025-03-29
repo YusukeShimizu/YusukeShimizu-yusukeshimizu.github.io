@@ -15,7 +15,27 @@ llmを使い、かなり意訳している。&lt;/p>
 &lt;p>アポロ計画では、重力とロケット工学の理論が確立していたために「ロケットを大きくすれば月に行ける」と計算で導けた。しかし、現在の AI には対応する理論モデルが存在せず、なぜ LLM が機能するのかさえ十分に分かっていない。それでもモデルは拡大し続け、何かに到達しつつあるように見える。だが、その到達点が本当に「人間を超える知能」なのかどうかは未知数である。&lt;/p>
 &lt;h2 id="結論">結論&lt;/h2>
 &lt;p>AGI が真に実現するかどうか、あるいはいつ実現するかは確証を得られていない。悲観的なリスクを示唆する見解と、楽観的な技術開発論が同時に存在する。すべては「知能が本質的に何であるか」という未解明の問いに依存する。実現すれば大きな恩恵をもたらす可能性がある一方、取り返しのつかない被害をもたらすかもしれない。この不確実性こそが AGI 論の核心である。&lt;/p>
-&lt;p>&lt;a href="https://yusukeshimizu.github.io/blog/benedictevans/category/Artificial+Intelligence">人工知能&lt;/a> &lt;a href="https://yusukeshimizu.github.io/blog/benedictevans?author=50363cf324ac8e905e7df863">Benedict Evans&lt;/a> 2024年5月4日&lt;/p></description></item><item><title>Wallet Recover</title><link>https://yusukeshimizu.github.io/blog/posts/wallet-recover/</link><pubDate>Thu, 27 Mar 2025 11:34:54 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/wallet-recover/</guid><description>&lt;p>mnemonic seedを保持していれば、ウォレットの残高をリカバリーできる。これは一見不思議だが、実際には無限に生成可能なアドレス（script pubkey）のうち、使用されたものだけを検出し、UTXOを取得する仕組みがあるためである。どのアドレスが使われたかを追跡できるからこそ、seedを頼りに残高を復元できる。&lt;/p>
+&lt;p>&lt;a href="https://yusukeshimizu.github.io/blog/benedictevans/category/Artificial+Intelligence">人工知能&lt;/a> &lt;a href="https://yusukeshimizu.github.io/blog/benedictevans?author=50363cf324ac8e905e7df863">Benedict Evans&lt;/a> 2024年5月4日&lt;/p></description></item><item><title>なぜ我々は MCP に全力投球しているのか</title><link>https://yusukeshimizu.github.io/blog/posts/mcp-future/</link><pubDate>Fri, 28 Mar 2025 00:00:00 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/mcp-future/</guid><description>&lt;p>&lt;a href="https://mastra.ai/blog/mastra-mcp">https://mastra.ai/blog/mastra-mcp&lt;/a> からのllmを用いた意訳である&lt;/p>
+&lt;hr>
+&lt;p>AI エージェント向けツール統合の現状は混沌としている。「MCP Calendar integration」の検索結果からも明らかなように、どの実装が最適かを判断する統一基準がない。ツールの発見、インストール、設定は未解決の課題である。&lt;/p>
+&lt;p>Mastra では、この問題に取り組み、Anthropic の Model Context Protocol (MCP) が &lt;strong>エージェントとツールの相互作用の将来&lt;/strong> であると確信している。&lt;/p>
+&lt;h2 id="競合する標準規格">競合する標準規格&lt;/h2>
+&lt;p>現在、複数のアプローチが競合している：&lt;/p>
+&lt;h3 id="agentsjson-wildcard">Agents.json (Wildcard)&lt;/h3>
+&lt;p>&lt;a href="https://docs.wild-card.ai/agentsjson/introduction">Agents.json&lt;/a>は OpenAPI を拡張し、LLM 向けに API 相互作用を最適化する。開発者向け API と LLM 用 API の乖離に対処し、既存 API に文脈情報を補完する。&lt;/p>
+&lt;h3 id="composio">Composio&lt;/h3>
+&lt;p>&lt;a href="https://composio.dev">Composio&lt;/a>は独自仕様と豊富な統合ライブラリを提供している。最近は&lt;a href="https://x.com/composiohq/status/1896968949654495291">MCP サポートも追加&lt;/a>し、選択肢を広げた。&lt;/p>
+&lt;h3 id="model-context-protocol-mcp">Model Context Protocol (MCP)&lt;/h3>
+&lt;p>&lt;a href="https://modelcontextprotocol.io/introduction">MCP&lt;/a>は Anthropic 管理のオープンスタンダードであり、OSS コミュニティの協力で構築されている。AI アプリケーションの「USB-C ポート」として、LLM を外部ツールに接続する標準インターフェースを提供する。&lt;/p>
+&lt;h2 id="mcp-の課題">MCP の課題&lt;/h2>
+&lt;p>MCP エコシステムの主な課題は3つある：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>Discovery&lt;/strong>: ツール発見のための標準化された方法がない&lt;/li>
+&lt;li>&lt;strong>Quality&lt;/strong>: 集中管理されたレジストリや検証プロセスがない&lt;/li>
+&lt;li>&lt;strong>Configuration&lt;/strong>: 各プロバイダーが独自の設定スキーマを持つ&lt;/li>
+&lt;/ol>
+&lt;p>Shopify CEO の Tobi Lütke は&lt;a href="https://x.com/tobi/status/1891137636720419191">MCP を「LLM ツールの USB-C」&lt;/a>と表現しつつも、まだプロトコルだけで「プラグ」が欠けていると指摘している。&lt;/p>
+&lt;p>コミュニティは &lt;a href="https://github.com/orgs/modelcontextprotocol/discussions/159">Official Registry&lt;/a> や &lt;a href="https://github.com/orgs/modelcontextprotocol/discussions/84">&lt;code>.well-known/mcp.json&lt;/code>&lt;/a> などの規格で問題解決に取り組んでいる。&lt;/p></description></item><item><title>Wallet Recover</title><link>https://yusukeshimizu.github.io/blog/posts/wallet-recover/</link><pubDate>Thu, 27 Mar 2025 11:34:54 +0900</pubDate><guid>https://yusukeshimizu.github.io/blog/posts/wallet-recover/</guid><description>&lt;p>mnemonic seedを保持していれば、ウォレットの残高をリカバリーできる。これは一見不思議だが、実際には無限に生成可能なアドレス（script pubkey）のうち、使用されたものだけを検出し、UTXOを取得する仕組みがあるためである。どのアドレスが使われたかを追跡できるからこそ、seedを頼りに残高を復元できる。&lt;/p>
 &lt;p>しかし、mnemonic seedを持っているのに残高が正しく復旧しないケースも存在する。また、レガシーSegWit（P2SHアドレス・3xxxx）の潜在的な危険性は誤解を生みやすい。これらを整理するために、btc walletの実装（https://github.com/btcsuite/btcwallet）を例にしながら、BIP0044/49/84/86が規定するHDウォレット構造と、ウォレットのリカバリー方法を示す。&lt;/p>
 &lt;h2 id="bipの概要と相互関係">BIPの概要と相互関係&lt;/h2>
 &lt;p>BIP0044、BIP0049、BIP0084、BIP0086はいずれもHDウォレットの「目的（purpose）番号」を定義し、各アドレス形式を区別している。以下、それぞれの要点をまとめる。&lt;/p>
